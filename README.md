@@ -78,7 +78,7 @@ Kediler arayüzün **tamamında** gezer: sayfadaki kutu kenarlarını ve çizgil
 Profil → Fotoğraf: JPG, PNG veya hareketli GIF/WebP (en fazla 120 MB). Profil → Kapak: görsel, GIF/WebP veya MP4/WebM video (en fazla 40 MB; sessiz ve döngüde oynar, "hareketi azalt" açıksa düz renk görünür). Dosyalar ham yüklenir (`PUT /api/me/media/:kind`), türü sihirli baytlarla doğrulanır.
 
 ## YouTube hesabını bağlama (Google ile giriş)
-Ayarlar (⚙) → **YouTube hesabı** → "Google ile giriş yap". Kullanıcı sadece Google'da giriş yapar; beğendiği müzikler ve playlistler listelerine aktarılır, YouTube aramaları kendi hesabıyla yapılır (API anahtarı gerekmez), kediler beğenilenlerden şarkı önerir. Jetonlar yalnızca kullanıcının cihazında tutulur.
+Ayarlar (⚙) → **YouTube hesabı** → "Google ile giriş yap". Bağlıyken **🔄 Yenile** düğmesi, YouTube'a sonradan beğendiğin / playlistlere eklediğin müzikleri aktarılmış listelere en üste ekler (çalınamayanlar atlanır, silinenler listeden çıkarılmaz). Kullanıcı sadece Google'da giriş yapar; beğendiği müzikler ve playlistler listelerine aktarılır, YouTube aramaları kendi hesabıyla yapılır (API anahtarı gerekmez), kediler beğenilenlerden şarkı önerir. Jetonlar yalnızca kullanıcının cihazında tutulur.
 
 **Uygulama sahibinin tek seferlik kurulumu** (kullanıcılar bunu yapmaz):
 1. console.cloud.google.com → proje oluştur → **YouTube Data API v3**'ü etkinleştir.
@@ -86,3 +86,5 @@ Ayarlar (⚙) → **YouTube hesabı** → "Google ile giriş yap". Kullanıcı s
 3. Kimlik bilgileri → OAuth istemci kimliği → *Web uygulaması*; yetkili yönlendirme URI'si: `http://localhost:38123/api/yt/callback` (masaüstü) ve varsa kendi sunucu adresin için `https://alanadin/api/yt/callback`.
 4. Çıkan Client ID ve Secret'ı **depoya yazma** (GitHub push koruması engeller). GitHub → Settings → Secrets and variables → Actions → *New repository secret* ile `GOOGLE_CLIENT_ID` ve `GOOGLE_CLIENT_SECRET` adıyla ekle; sürüm derlenirken `server/google.json` otomatik oluşturulur ve uygulamayla paketlenir. Yerelde denemek için aynı adlı ortam değişkenlerini ver.
 5. Yayınlamak için OAuth izin ekranında ana sayfa ve gizlilik politikası adresi gerekir: ana sayfa `https://github.com/yonarasd-creator/Yoni`, gizlilik `https://github.com/yonarasd-creator/Yoni/blob/main/PRIVACY.md`. Masaüstü tipi uygulamalarda Google bu secret'ı gizli saymaz, yine de depo herkese açıksa repoya yazmak yerine yalnızca derleme sırasında dosyayı ekleyebilirsin.
+
+**Küçük ayrıntılar:** YouTube videosu çalarken sağ alttaki oynatıcıyı ✕ ile ya da çubuktaki 📺 ile gizleyebilirsin (müzik sürer). Listelerde şarkıları ▲▼ ile ya da sürükleyip bırakarak sıralayabilirsin.
