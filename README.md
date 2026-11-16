@@ -32,13 +32,13 @@ Kişiselleştirilebilir müzik çalar: hesap/giriş, Discord tarzı profiller, a
 
 ## Klasör yapısı
 ```
-server/index.js   Sunucu (API + WebSocket + veri)
-public/           İstemci: index.html (tüm arayüz), sw.js, manifest, ikon
+server/index.js   Sunucu girişi; modüller: depo, yardimci, oturum, dogrula, canli (WebSocket), rotalar/ (hesap, youtube, sosyal)
+public/           İstemci: index.html (iskelet), stil.css, js/ (bölümlere ayrılmış arayüz kodu), sw.js, manifest, ikon
 test/test.js      Sunucu uçtan uca testi   → npm test
 test/ui.test.js   Arayüz duman testi       → npm run test:ui (npm install gerekir)
 data/             Çalışırken oluşur: db.json + yüklenen profil görselleri (yedeklenecek klasör bu)
 ```
-VS Code'da `public/index.html` düzenle → sayfayı yenile. Sunucu için `npm run dev` (otomatik yeniden başlar) veya **F5**.
+VS Code'da `public/js/*.js` veya `public/stil.css` düzenle → sayfayı yenile. Sunucu için `npm run dev` (otomatik yeniden başlar) veya **F5**.
 
 ## Ayarlar (ortam değişkenleri)
 `PORT` (3000) · `DATA_DIR` (./data) · `TRUST_PROXY=1` (ters vekil/HTTPS arkasında).

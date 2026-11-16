@@ -1,4 +1,4 @@
-const C='muzigim-v15',FILES=['./','index.html','manifest.webmanifest','icon.png','logos/logo-1.png','logos/logo-2.png','logos/logo-3.png','logos/logo-4.png','logos/logo-5.png','logos/logo-6.png','logos/logo-7.png','anma.js','kedi-art.js','kedi.js'];
+const C='muzigim-v16',FILES=['./','index.html','manifest.webmanifest','icon.png','logos/logo-1.png','logos/logo-2.png','logos/logo-3.png','logos/logo-4.png','logos/logo-5.png','logos/logo-6.png','logos/logo-7.png','anma.js','kedi-art.js','kedi.js','stil.css','js/cekirdek.js','js/kaynaklar.js','js/oynatici.js','js/kedi-mod.js','js/kuyruk-youtube.js','js/liste-gorunumleri.js','js/mini-liste.js','js/sosyal-profil.js','js/tema.js','js/aktar-youtube.js','js/baslat.js'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(FILES)));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!=C).map(x=>caches.delete(x)))));self.clients.claim()});
 self.addEventListener('fetch',e=>{

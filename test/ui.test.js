@@ -6,7 +6,7 @@ const srv=spawn(process.execPath,[path.join(__dirname,'../server/index.js')],{en
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));let cookie='',errs=[],ok=0,bad=0;
 const t=(n,c)=>{c?ok++:bad++;console.log((c?'✓ ':'✗ ')+n)};
 srv.stdout.once('data',async()=>{
- const html=fs.readFileSync(path.join(__dirname,'../public/index.html'),'utf8');
+ const html=fs.readFileSync(path.join(__dirname,'../public/index.html'),'utf8').replace(/<script src="(js\/[^"]+)"><\/script>/g,(m,f)=>'<script>'+fs.readFileSync(path.join(__dirname,'../public',f),'utf8').replace(/<\/script/g,'<\\/script')+'</script>');
  const dom=new JSDOM(html,{runScripts:'dangerously',pretendToBeVisual:true,url:B+'/',beforeParse(w){
   w.indexedDB=indexedDB;w.IDBKeyRange=IDBKeyRange;w.HTMLMediaElement.prototype.play=()=>Promise.resolve();w.HTMLMediaElement.prototype.pause=()=>{};
   w.HTMLDialogElement.prototype.showModal=function(){this.open=true};w.HTMLDialogElement.prototype.close=function(){this.open=false};
