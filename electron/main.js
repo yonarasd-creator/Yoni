@@ -62,6 +62,16 @@ function applyAppIcon(url) {
   }).catch(() => {});
 }
 
+// Mini oynatıcının konumu: varsayılan sol üst; sürüklenince hatırlanır (ekran dışına taşmışsa sıfırlanır)
+const MINI_FILE = () => path.join(app.getPath('userData'), 'mini-konum.json');
+function miniPos() {
+  const { screen } = require('electron'); let p = { x: 12, y: 12 };
+  try { const j = JSON.parse(fs.readFileSync(MINI_FILE(), 'utf8')); if (Number.isFinite(j.x) && Number.isFinite(j.y) &&
+    screen.getAllDisplays().some(d => j.x >= d.bounds.x - 100 && j.x < d.bounds.x + d.bounds.width - 100 && j.y >= d.bounds.y && j.y < d.bounds.y + d.bounds.height - 40)) p = { x: j.x, y: j.y }; } catch {}
+  return p;
+}
+function saveMiniPos(b) { try { fs.writeFileSync(MINI_FILE(), JSON.stringify({ x: b.x, y: b.y })); } catch {} }
+
 function createWindow() {
   win = new BrowserWindow({
     width: 1280, height: 820, minWidth: 900, minHeight: 600, backgroundColor: '#111', autoHideMenuBar: true, icon: ICON,
@@ -71,13 +81,19 @@ function createWindow() {
   win.loadURL(BASE);
   win.on('close', e => { if (!quitting) { e.preventDefault(); win.hide(); } }); // kapatınca tepsiye iner, müzik sürer
   win.webContents.setWindowOpenHandler(({ url, frameName }) => {
-    if (frameName === 'muzigim-mini') return { action: 'allow', overrideBrowserWindowOptions: {
-      width: 360, height: 160, frame: false, alwaysOnTop: true, skipTaskbar: true, autoHideMenuBar: true, backgroundColor: '#1c1c1e', title: 'Yoni' } };
+    if (frameName === 'muzigim-mini') { const pos = miniPos(); return { action: 'allow', overrideBrowserWindowOptions: {
+      width: 360, height: 132, x: pos.x, y: pos.y, frame: false, resizable: false, transparent: false, alwaysOnTop: true, skipTaskbar: true,
+      focusable: false, // oyun/uygulama odağını çalmaz, Alt+Tab'ı bozmaz; fare ve genel kısayollar çalışır
+      show: false, autoHideMenuBar: true, backgroundColor: '#17171a', title: 'Yoni', roundedCorners: true } }; }
     if (/^https?:/.test(url)) shell.openExternal(url);
     return { action: 'deny' };
   });
   win.webContents.on('did-create-window', w => { // mini pencere oyunların/uygulamaların üstünde kalsın
-    w.setAlwaysOnTop(true, 'screen-saver'); w.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+    const top = () => { if (w.isDestroyed()) return; w.setAlwaysOnTop(true, 'screen-saver'); w.moveTop(); };
+    w.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true }); w.showInactive(); top();
+    const keep = setInterval(top, 2500); // oyunlar üste çıkarsa tekrar öne al
+    let t; w.on('moved', () => { clearTimeout(t); t = setTimeout(() => { if (!w.isDestroyed()) saveMiniPos(w.getBounds()); }, 400); });
+    w.on('closed', () => clearInterval(keep));
   });
 }
 
