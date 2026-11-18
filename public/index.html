@@ -10,15 +10,15 @@
 <script src="anma.js"></script>
 <script src="kedi-art.js"></script>
 <script src="kedi.js"></script>
-<header id="top"><img id="brand" alt="" style="width:28px;height:28px;border-radius:6px;margin-right:auto"><input id="tq" type="text" placeholder="Şarkı, sanatçı ara…"><button class="ic" id="tm" title="Mini oynatıcı (Alt+M)">🗗</button><button class="ic" id="tg">⚙</button><img id="tav" alt=""></header>
-<nav><button data-v="home" class="on">🏠 Ana Sayfa</button><button data-v="ara">🔍 Ara</button><button data-v="list">🎵 Liste</button><button data-v="soc">💬 Sosyal</button><button data-v="imp">📥 Aktar</button><button data-v="thm">🎨 Tema</button><button data-v="me">👤 Profil</button><div id="sbx"></div></nav>
+<header id="top"><img id="brand" alt="" style="width:28px;height:28px;border-radius:6px;margin-right:auto"><input id="tq" type="text" placeholder="Şarkı, sanatçı ara…"><button class="ic" id="tm" title="Mini oynatıcı (Alt+M)" data-i="mini"></button><button class="ic" id="tg" title="Ayarlar" data-i="gear"></button><img id="tav" alt=""></header>
+<nav><button data-v="home" class="on"><i data-i="home"></i>Ana Sayfa</button><button data-v="ara"><i data-i="search"></i>Ara</button><button data-v="list"><i data-i="list"></i>Liste</button><button data-v="soc"><i data-i="chat"></i><span>Sosyal</span></button><button data-v="imp"><i data-i="imp"></i>Aktar</button><button data-v="thm"><i data-i="theme"></i>Tema</button><button data-v="me"><i data-i="user"></i>Profil</button><div id="sbx"></div></nav>
 <main id="m"></main>
 <div id="bar"><div id="pg"><i></i></div>
-<button class="ic" id="cl">⌄</button><img id="art" alt="">
+<button class="ic" id="cl" data-i="down"></button><img id="art" alt="">
 <div id="np"><b>Henüz şarkı seçilmedi</b><small>Ara sekmesinden bir şarkı bul</small></div>
-<div id="ctl"><button class="ic" id="sh">🔀</button><button class="ic" id="pv">⏮</button><button class="ic" id="pp">▶</button><button class="ic" id="nx">⏭</button><button class="ic" id="rp">🔁</button><button class="ic" id="lk">🤍</button><button class="ic" id="qb">☰</button><button class="ic" id="ly">📝</button><button class="ic" id="yv" title="Videoyu gizle / göster">📺</button><button class="ic" id="ar">👤</button></div>
+<div id="ctl"><button class="ic" id="sh" data-i="shuf"></button><button class="ic" id="pv" data-i="prev"></button><button class="ic" id="pp" data-i="play"></button><button class="ic" id="nx" data-i="next"></button><button class="ic" id="rp" data-i="rep"></button><button class="ic" id="lk" data-i="heart"></button><button class="ic" id="qb" data-i="queue"></button><button class="ic" id="ly" data-i="lyr"></button><button class="ic" id="yv" title="Videoyu gizle / göster" data-i="tv"></button><button class="ic" id="ar" data-i="user"></button></div>
 <div id="skw"><input type="range" id="sk" min="0" max="1000" value="0"><div class="tm"><span id="t1">0:00</span><span id="t2">0:00</span></div></div>
-<div id="vw"><button class="ic" id="mute">🔊</button><input type="range" id="vol" min="0" max="100" value="100"></div>
+<div id="vw"><button class="ic" id="mute" data-i="vol2"></button><input type="range" id="vol" min="0" max="100" value="100"></div>
 </div>
 <aside id="side"><h4>Şu an çalıyor</h4><img id="sa" alt=""><b id="st">Henüz şarkı yok</b><small id="sar" class="muted"></small><h4>Sıradaki</h4><div id="sq"></div></aside>
 <div id="ytw"><div id="ytp"></div><button id="yx" title="Videoyu gizle (müzik çalmaya devam eder)">✕</button></div>

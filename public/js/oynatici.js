@@ -25,16 +25,16 @@ function nx(auto){
 const pv=()=>{if((yt?yp.getCurrentTime():au.currentTime)>3){yt?yp.seekTo(0,true):au.currentTime=0}else if(idx>0)play(queue,idx-1)};
 $('#nx').onclick=()=>nx();$('#pv').onclick=pv;
 $('#pp').onclick=()=>{if(yt)yp.getPlayerState()==1?yp.pauseVideo():yp.playVideo();else au.src&&(au.paused?au.play():au.pause())};
-au.onplay=()=>$('#pp').textContent='⏸';au.onpause=()=>$('#pp').textContent='▶';au.onended=()=>nx(true);
+au.onplay=()=>setIc($('#pp'),'pause');au.onpause=()=>setIc($('#pp'),'play');au.onended=()=>nx(true);
 au.onerror=()=>{if(au.src)toast('Çalınamadı, sıradakine geçiliyor');setTimeout(()=>nx(),800)};
 const fmt=s=>isFinite(s)?Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0'):'0:00';
 au.ontimeupdate=()=>{if(!sk.dragging)$('#sk').value=au.duration?au.currentTime/au.duration*1000:0;$('#t1').textContent=fmt(au.currentTime);$('#t2').textContent=fmt(au.duration);$('#pg i').style.width=(au.duration?au.currentTime/au.duration*100:0)+'%'};
 const sk=$('#sk');sk.oninput=()=>{sk.dragging=1;if(yt)yp.seekTo(sk.value/1000*yp.getDuration(),true);else au.currentTime=sk.value/1000*au.duration};sk.onchange=()=>sk.dragging=0;
-$('#sh').onclick=e=>{shuf=!shuf;e.target.style.opacity=shuf?1:.4;toast(shuf?'Karışık açık':'Karışık kapalı')};
-$('#rp').onclick=e=>{rpt=(rpt+1)%3;e.target.textContent=rpt==2?'🔂':'🔁';e.target.style.opacity=rpt?1:.4;toast(['Tekrar kapalı','Listeyi tekrarla','Şarkıyı tekrarla'][rpt])};
+$('#sh').onclick=e=>{shuf=!shuf;e.currentTarget.style.opacity=shuf?1:.4;toast(shuf?'Karışık açık':'Karışık kapalı')};
+$('#rp').onclick=e=>{rpt=(rpt+1)%3;const b=e.currentTarget;setIc(b,rpt==2?'rep1':'rep');b.style.opacity=rpt?1:.4;toast(['Tekrar kapalı','Listeyi tekrarla','Şarkıyı tekrarla'][rpt])};
 $('#sh').style.opacity=$('#rp').style.opacity=.4;
 // ---- Beğeni, sıra paneli, son dinlenenler, kilit ekranı
 const cT=()=>queue[idx];
-async function paintLike(){const t=cT(),l=t&&await get('lists','liked');$('#lk').textContent=l&&l.ids.includes(t.id)?'❤️':'🤍';mini()}
+async function paintLike(){const t=cT(),l=t&&await get('lists','liked');setIc($('#lk'),l&&l.ids.includes(t.id)?'heartf':'heart');$('#lk').classList.toggle('lkd',!!(l&&l.ids.includes(t.id)));mini()}
 $('#lk').onclick=async()=>{const t=cT();if(!t)return;const l=await get('lists','liked')||{id:'liked',name:'❤ Beğenilenler',ids:[]};
  if(l.ids.includes(t.id)){l.ids=l.ids.filter(x=>x!=t.id);await put('lists',l);toast('Beğenilenlerden çıkarıldı')}else{await addTo(l,[t]);toast('Beğenildi ❤')}paintLike()};

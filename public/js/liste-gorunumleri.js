@@ -17,7 +17,7 @@ async function download(t){
 }
 const rowHTML=(t,i,off,extra)=>`<div class="row${t.id===queue[idx]?.id?' cur':''}" data-i="${i}" data-id="${esc(t.id)}">${t.art?`<img src="${esc(t.art)}" loading="lazy">`:'<div class="ph"></div>'}
 <div class="i" data-a="play"><b>${esc(t.title)}</b><small>${esc(t.artist)}${t.src?' · '+t.src:''}</small></div>
-${extra||'<button class="ic" data-a="add">＋</button><button class="ic" data-a="sh">↗</button>'}${(t.aid||t.url)?`<button class="ic ${off?'ok':''}" data-a="dl">${off?'✓':'⬇'}</button>`:''}</div>`;
+${extra||`<button class="ic" data-a="add">${ic('plus')}</button><button class="ic" data-a="sh">${ic('ext')}</button>`}${(t.aid||t.url)?`<button class="ic ${off?'ok':''}" data-a="dl">${ic(off?'check':'dl')}</button>`:''}</div>`;
 // ---- Views
 let view='ara',res=[],cur=null,curList=[];
 async function show(v){view=v;document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v==v));cur=show.keep||null;renderSbx();show.keep=null;chatWith=null;({home:vHome,ara:vAra,list:vList,imp:vImp,soc:vSoc,thm:vTheme,me:vMe})[v]()}
@@ -66,7 +66,7 @@ async function vHome(){
  M.innerHTML=`<h2 style="margin:0 0 14px">${g}${ME?', '+esc(ME.display):''} 👋</h2>
  <div class="hrow"><div class="aod" id="aod"${dc?` style="background-image:linear-gradient(to top,#000b,#0003),url(${esc(cssUrl(dc))})"`:''}><small>GÜNÜN LİSTESİ</small><button class="pl">▶</button><div><h2>${dl?esc(dl.name):'Henüz liste yok'}</h2><small>${dl?dl.ids.length+' şarkı':'Ara’dan şarkı bul, ＋ ile ekle'}</small></div></div>
  <div><h3 style="margin:0 0 10px">Listelerin</h3><div class="w4" id="hg">${wk.map((l,i)=>tile(l,wc[i])).join('')||'<p class="muted">Daha fazla liste oluşturunca burada görünür.</p>'}</div></div></div>
- <div class="hrow"><div class="pn mix"><h3 style="margin:0 0 6px">Günlük karışım</h3><div id="mx">${mix.map((t,i)=>`<div class="row" data-i="${i}">${t.art?`<img src="${esc(t.art)}">`:'<div class="ph"></div>'}<div class="i"><b>${esc(t.title)}</b><small>${esc(t.artist)}</small></div><small>${esc(t.src||'Cihaz')}</small><button class="ic" data-a="lk">${lkd?.ids.includes(t.id)?'❤️':'🤍'}</button></div>`).join('')||'<p class="muted">Şarkı dinledikçe burada görünür.</p>'}</div></div>
+ <div class="hrow"><div class="pn mix"><h3 style="margin:0 0 6px">Günlük karışım</h3><div id="mx">${mix.map((t,i)=>`<div class="row" data-i="${i}">${t.art?`<img src="${esc(t.art)}">`:'<div class="ph"></div>'}<div class="i"><b>${esc(t.title)}</b><small>${esc(t.artist)}</small></div><small>${esc(t.src||'Cihaz')}</small><button class="ic" data-a="lk">${ic(lkd?.ids.includes(t.id)?'heartf':'heart')}</button></div>`).join('')||'<p class="muted">Şarkı dinledikçe burada görünür.</p>'}</div></div>
  <div><div class="pn" style="margin-bottom:14px"><h3 style="margin:0 0 6px">Kataloğu genişlet</h3><p class="muted" style="margin:0 0 10px">YouTube ve Jamendo anahtarı ekleyerek çok daha fazla şarkıya ulaş.</p><button class="btn pill" id="hk">Kaynakları ayarla</button></div>
  <div class="pn"><h4 style="margin:0 0 10px">İstatistikler</h4><div class="stats"><div><b>${tt}</b><small>Toplam süre</small></div><div><b>${lkd?lkd.ids.length:0}</b><small>Beğeni</small></div><div><b>${nt}</b><small>Şarkı</small></div></div></div></div></div>`;
  $('#aod').onclick=async()=>{if(dl){const t=await getTs(dl);t.length&&play(t,0)}};

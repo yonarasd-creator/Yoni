@@ -36,7 +36,7 @@ function connectWS(){
    else if(d.m.from!=ME.username){UNR[o]=(UNR[o]||0)+1;badge();toast('💬 '+o+': '+(d.m.text||'🎵 şarkı gönderdi'))}}
   else loadFR()};
  ws.onclose=()=>{ws=null;if(ME&&!offline)setTimeout(connectWS,3000)}}
-const badge=()=>{const n=Object.values(UNR).reduce((a,b)=>a+b,0);document.querySelector('[data-v=soc]').innerHTML='💬 Sosyal'+(n?`<span class="bd">${n}</span>`:'')};
+const badge=()=>{const n=Object.values(UNR).reduce((a,b)=>a+b,0);document.querySelector('[data-v=soc]').innerHTML='<i>'+ic('chat')+'</i><span>Sosyal</span>'+(n?`<span class="bd">${n}</span>`:'')};
 async function loadFR(){try{FR=await api('GET','/friends');UNR=await api('GET','/unread');badge();if(view=='soc'&&!chatWith)vSoc()}catch{}}
 async function vSoc(){
  if(!ME)return M.innerHTML='<p class="muted">Sosyal özellikler için hesapla giriş yapmalısın. Profil sekmesinden giriş yapabilirsin.</p>';

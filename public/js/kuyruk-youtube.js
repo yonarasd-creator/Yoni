@@ -13,7 +13,7 @@ const ytReady=()=>new Promise(ok=>{if(window.YT&&window.YT.Player)return ok();wi
 async function ytPlay(t){yt=t;$('#ytw').style.display='block';$('#bar').classList.add('yt');await ytReady();if(yt!==t)return;
  if(yp&&yp.loadVideoById)return yp.loadVideoById(t.yid);
  yp=new window.YT.Player('ytp',{width:'100%',height:'100%',videoId:t.yid,playerVars:{playsinline:1,autoplay:1,rel:0},events:{onReady:e=>{e.target.setVolume(+vol.value);e.target.playVideo()},
-  onStateChange:e=>{if(e.data==1)$('#pp').textContent='⏸';else if(e.data==2)$('#pp').textContent='▶';else if(e.data==0)nx(true);mini()},
+  onStateChange:e=>{if(e.data==1)setIc($('#pp'),'pause');else if(e.data==2)setIc($('#pp'),'play');else if(e.data==0)nx(true);mini()},
   onError:()=>{toast('Bu YouTube videosu gömülemiyor, sıradakine geçiliyor');nx()}}})}
 const ytHide=h=>{document.documentElement.classList.toggle('yh',h);try{localStorage.setItem('yth',h?'1':'')}catch{}};
 try{if(localStorage.getItem('yth'))document.documentElement.classList.add('yh')}catch{}
@@ -39,7 +39,7 @@ const PH="data:image/svg+xml,"+encodeURIComponent('<svg xmlns="http://www.w3.org
 $('#art').src=PH;
 const vol=$('#vol');let v0=1;try{v0=+localStorage.getItem('vol')||1}catch{}
 au.volume=v0;vol.value=v0*100;
-const vic=()=>$('#mute').textContent=au.muted||au.volume==0?'🔇':au.volume<.5?'🔉':'🔊';
+const vic=()=>setIc($('#mute'),au.muted||au.volume==0?'vol0':au.volume<.5?'vol1':'vol2');
 vol.oninput=()=>{au.muted=false;au.volume=vol.value/100;if(yp&&yp.setVolume)yp.setVolume(+vol.value);try{localStorage.setItem('vol',au.volume)}catch{};vic()};
 $('#mute').onclick=()=>{au.muted=!au.muted;vic()};vic();
 const bar=$('#bar'),openFull=()=>{if(matchMedia('(min-width:900px)').matches)return;if(!bar.classList.contains('full')){bar.classList.add('full');history.pushState({f:1},'')}};

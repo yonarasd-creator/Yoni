@@ -135,3 +135,11 @@ nav button:active{transform:scale(.95);background:rgba(255,255,255,.12)}
 @keyframes lgin{from{opacity:0}}@keyframes lgpop{from{transform:scale(.88);opacity:0}}
 @media (prefers-reduced-motion:reduce){#lgv,#lgv img{animation:none}}
 #yx{position:absolute;top:4px;right:4px;z-index:2;border:0;border-radius:50%;width:24px;height:24px;background:rgba(0,0,0,.65);color:#fff;cursor:pointer;opacity:0;transition:opacity .15s}#ytw:hover #yx{opacity:1}#yv{display:none}#bar.yt #yv{display:inline-block}html.yh #ytw{right:auto!important;left:-9999px!important}html.yh #bar.yt~#side #sa{height:auto!important;aspect-ratio:1!important;opacity:1!important}
+/* Simgeler */
+.si{width:1.15em;height:1.15em;vertical-align:-.2em;flex:none;pointer-events:none}
+nav button i{display:inline-flex;margin-right:7px;vertical-align:middle}nav button .si{width:1.2em;height:1.2em;vertical-align:0}
+.ic{display:inline-flex;align-items:center;justify-content:center}.ic .si{width:1.15em;height:1.15em}
+#lk.lkd{color:#ff4d6d}#pp .si{width:1em;height:1em}
+@media (max-width:640px){nav button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px}nav button i{margin:0}}
+nav button .si{margin-right:7px}nav button .bd{margin-left:6px}@media (max-width:640px){nav button .si{margin:0}}
+nav button{display:flex;align-items:center;justify-content:flex-start}nav button i{display:inline-flex}@media (max-width:640px){nav button{flex-direction:column;justify-content:center;gap:3px}}
