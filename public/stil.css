@@ -152,3 +152,5 @@ nav button{display:flex;align-items:center;justify-content:flex-start}nav button
 #upd .si{width:20px;height:20px;color:#ffd84a;flex:none}#upd span{display:flex;flex-direction:column;line-height:1.25}#upd b{font-size:13px}#upd small{font-size:11px;color:var(--m,#a0a0a8)}
 #upd.ready{border-color:var(--a,#1db6a0);box-shadow:0 8px 24px #0006,0 0 0 1px var(--a,#1db6a0) inset}#upd.ready .si{animation:updz 1.6s ease-in-out infinite}#upd.ready:hover{background:rgba(40,40,46,.97)}
 @keyframes updin{from{transform:translateY(-14px);opacity:0}}@keyframes updz{50%{transform:scale(1.2) rotate(-8deg)}}
+/* Efektli temalar: paneller temadan renk alır, yarı saydam durur ki arka plandaki kar/kor görünsün */
+html.fx nav,html.fx main,html.fx #side,html.fx #bar{background:var(--s);backdrop-filter:blur(5px)}
