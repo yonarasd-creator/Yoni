@@ -1,5 +1,5 @@
 // Yoni masaüstü uygulaması: sunucuyu içinde başlatır, sistem tepsisinde yaşar, genel kısayollar sunar.
-const { app, BrowserWindow, Tray, Menu, globalShortcut, nativeImage, shell, dialog, net } = require('electron');
+const { app, BrowserWindow, ipcMain, Tray, Menu, globalShortcut, nativeImage, shell, dialog, net } = require('electron');
 const path = require('path'), http = require('http'), fs = require('fs');
 const PORT = +process.env.MUZIGIM_PORT || 38123, REMOTE = process.env.MUZIGIM_URL; // MUZIGIM_URL: başka bir sunucuya bağlan
 const BASE = REMOTE || `http://localhost:${PORT}`, ICON = path.join(__dirname, 'icon.png');
@@ -75,7 +75,7 @@ function saveMiniPos(b) { try { fs.writeFileSync(MINI_FILE(), JSON.stringify({ x
 function createWindow() {
   win = new BrowserWindow({
     width: 1280, height: 820, minWidth: 900, minHeight: 600, backgroundColor: '#111', autoHideMenuBar: true, icon: ICON,
-    webPreferences: { backgroundThrottling: false, autoplayPolicy: 'no-user-gesture-required', contextIsolation: true }
+    webPreferences: { backgroundThrottling: false, autoplayPolicy: 'no-user-gesture-required', contextIsolation: true, preload: path.join(__dirname, 'onyukle.js') }
   });
   win.webContents.on('page-favicon-updated', (_e, favs) => { if (favs && favs[0]) applyAppIcon(favs[0]); });
   win.loadURL(BASE);
@@ -114,18 +114,19 @@ function checkUpdates(manual) {
   manualCheck = !!manual;
   autoUpdater.checkForUpdates().catch(e => { if (manual) dialog.showErrorBox('Güncelleme denetlenemedi', String(e.message || e)); });
 }
+let upState = null;
+function send(d) { upState = d; try { if (win && !win.isDestroyed()) win.webContents.send('guncelleme', d); } catch {} }
+ipcMain.handle('guncelleme-durum', () => upState);
+ipcMain.handle('guncelleme-denetle', () => { checkUpdates(true); });
+ipcMain.handle('guncelleme-kur', () => { if (autoUpdater && upState && upState.durum == 'hazir') { quitting = true; autoUpdater.quitAndInstall(); } });
 function setupUpdater() {
   if (!autoUpdater) return;
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true; // sorulmasa bile çıkarken kurulur
-  autoUpdater.on('update-available', i => { if (manualCheck) dialog.showMessageBox({ message: `Yeni sürüm bulundu (${i.version}), indiriliyor…` }); });
+  autoUpdater.on('update-available', i => { send({ durum: 'iniyor', surum: i.version }); if (manualCheck) dialog.showMessageBox({ message: `Yeni sürüm bulundu (${i.version}), indiriliyor…` }); });
   autoUpdater.on('update-not-available', () => { if (manualCheck) dialog.showMessageBox({ message: 'Yoni güncel (' + app.getVersion() + ').' }); manualCheck = false; });
   autoUpdater.on('error', e => { console.error('Güncelleme hatası:', e && e.message); });
-  autoUpdater.on('update-downloaded', i => {
-    dialog.showMessageBox({ type: 'info', buttons: ['Şimdi yeniden başlat', 'Sonra'], defaultId: 0, cancelId: 1,
-      title: 'Güncelleme hazır', message: `Yoni ${i.version} indirildi.`, detail: 'Yeniden başlatınca kurulur.' })
-      .then(r => { if (r.response === 0) { quitting = true; autoUpdater.quitAndInstall(); } });
-  });
+  autoUpdater.on('update-downloaded', i => { send({ durum: 'hazir', surum: i.version }); }); // bildirim arayüzde (sağ üst + kedi); tıklayınca kurulur, tıklanmazsa çıkarken kurulur
   setTimeout(() => checkUpdates(false), 5000);            // açılıştan kısa süre sonra
   setInterval(() => checkUpdates(false), 6 * 3600 * 1000); // ve her 6 saatte bir
 }

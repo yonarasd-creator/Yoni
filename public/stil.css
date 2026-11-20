@@ -147,3 +147,8 @@ nav button{display:flex;align-items:center;justify-content:flex-start}nav button
 *{scrollbar-width:thin;scrollbar-color:#ffffff33 transparent}
 ::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#ffffff2e;border-radius:8px;border:2px solid transparent;background-clip:padding-box}::-webkit-scrollbar-thumb:hover{background:#ffffff55;background-clip:padding-box;border:2px solid transparent}::-webkit-scrollbar-button,::-webkit-scrollbar-corner{display:none}
 #sbx h4.tg{display:flex;align-items:center;justify-content:space-between;cursor:pointer;border-radius:8px;padding:4px 8px;margin:12px 0 4px}#sbx h4.tg:hover{background:rgba(255,255,255,.06)}#sbx h4.tg .si{width:14px;height:14px}#sbx h4.tg .cv{display:inline-flex}
+/* Güncelleme rozeti */
+#upd{position:fixed;top:12px;right:14px;z-index:60;display:flex;align-items:center;gap:10px;padding:9px 14px 9px 11px;border:1px solid #ffffff22;border-radius:12px;color:var(--t,#f2f2f2);background:rgba(24,24,28,.92);backdrop-filter:blur(10px);box-shadow:0 8px 24px #0006;font:inherit;text-align:left;animation:updin .35s cubic-bezier(.2,.9,.3,1.2)}
+#upd .si{width:20px;height:20px;color:#ffd84a;flex:none}#upd span{display:flex;flex-direction:column;line-height:1.25}#upd b{font-size:13px}#upd small{font-size:11px;color:var(--m,#a0a0a8)}
+#upd.ready{border-color:var(--a,#1db6a0);box-shadow:0 8px 24px #0006,0 0 0 1px var(--a,#1db6a0) inset}#upd.ready .si{animation:updz 1.6s ease-in-out infinite}#upd.ready:hover{background:rgba(40,40,46,.97)}
+@keyframes updin{from{transform:translateY(-14px);opacity:0}}@keyframes updz{50%{transform:scale(1.2) rotate(-8deg)}}
