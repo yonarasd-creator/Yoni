@@ -7,6 +7,7 @@ async function play(list,i){
  const b=await get('blobs',t.id);
  if(url){URL.revokeObjectURL(url);url=null}
  if(b){url=URL.createObjectURL(b.blob);au.src=url}
+ else if(t.yid&&!navigator.onLine){toast('İnternet yok: YouTube şarkıları çevrimdışı çalınamaz');if(i+1<list.length)return play(list,i+1);return}
  else if(t.yid)au.pause();
  else if(srcUrl(t)&&navigator.onLine)au.src=srcUrl(t);
  else{toast('İnternet yok, bu şarkı indirilmemiş');if(i+1<list.length)return play(list,i+1);return}

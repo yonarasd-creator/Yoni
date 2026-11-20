@@ -83,9 +83,9 @@ function editList(l){
 async function vOne(){
  const l=await get('lists',cur),off=new Set(await keys('blobs'));
  curList=(await Promise.all(l.ids.map(id=>get('tracks',id)))).filter(Boolean);
- const nOff=curList.filter(t=>off.has(t.id)).length,cv=await coverOf(l);
+ const nOff=curList.filter(t=>off.has(t.id)).length,nYt=curList.filter(t=>t.yid&&!off.has(t.id)).length,cv=await coverOf(l);
  M.innerHTML=`<button class="ic" id="bk" title="Geri">←</button>
- <div class="lh"><img class="lc" src="${esc(cv||PH)}"><div class="lt"><small>LİSTE</small><h2>${esc(l.name)}</h2>${l.bio?`<p class="lb">${esc(l.bio)}</p>`:''}<small>${curList.length} şarkı · ${nOff} çevrimdışı hazır</small></div></div>
+ <div class="lh"><img class="lc" src="${esc(cv||PH)}"><div class="lt"><small>LİSTE</small><h2>${esc(l.name)}</h2>${l.bio?`<p class="lb">${esc(l.bio)}</p>`:''}<small>${curList.length} şarkı · ${nOff} çevrimdışı hazır${nYt?` · ${nYt} YouTube şarkısı cihazda kayıtlı (çalmak için internet gerekir)`:''}</small></div></div>
  <div class="la"><button class="pl2" id="pa" title="Çal">${ic('play')}</button><button class="ic" id="da" title="Hepsini indir">${ic('dl')}</button><button class="ic" id="rn" title="Kapak, ad ve bio düzenle">${ic('edit')}</button><button class="ic" id="dl" title="Listeyi sil">${ic('trash')}</button></div>
  <div id="r" class="cpt">${curList.map((t,i)=>rowHTML(t,i,off.has(t.id),'<button class="ic" data-a="up" title="Yukarı">'+ic('up')+'</button><button class="ic" data-a="dn" title="Aşağı">'+ic('down')+'</button><button class="ic" data-a="sh">'+ic('ext')+'</button><button class="ic" data-a="rm">'+ic('close')+'</button>')).join('')}</div>`;
  const mv=async(i,j)=>{if(j<0||j>=curList.length)return;const ids=curList.map(x=>x.id),[x]=ids.splice(i,1);ids.splice(j,0,x);l.ids=[...ids,...l.ids.filter(z=>!ids.includes(z))];await put('lists',l);vOne()};
