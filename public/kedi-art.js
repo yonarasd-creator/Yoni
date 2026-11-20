@@ -283,6 +283,60 @@
     return head(r, t, P, 31.5, 11.5);
   };
 
+  // ---- önden bakan oturuş (kurt ve ejderha): simetrik, iri kafa, açık göğüs/karın çizgileri ----
+  const mir = (pts, c = 24) => pts.map(([x, y]) => [2 * c - x, y]);
+  function frontWolf(r, t, P) {
+    const br = P.breath || 0, hd = P.head || {}, hy = 12 + br * .4 + (hd.dy || 0), sw = Math.sin((P.tail && P.tail.ph) || 0) * 1.2;
+    // kuyruk: sağ yanda kıvrılır, ucu koyu
+    const tp = [[31, 36], [35.5, 37], [39, 34.5 + sw], [40.5, 30 + sw]];
+    for (let i = 0; i < tp.length - 1; i++) r.line(...tp[i], ...tp[i + 1], 4.4, i == tp.length - 2 ? t.s : t.b);
+    r.ell(16.5, 32, 6.2, 6, bodyCol(t, .55)); r.ell(31.5, 32, 6.2, 6, bodyCol(t, .55)); // kalçalar
+    r.ell(15.5, 37.4, 3.8, 1.6, t.l); r.ell(32.5, 37.4, 3.8, 1.6, t.l);
+    r.poly([[19, 18], [29, 18], [32.5, 37.5], [15.5, 37.5]], (x, y) => { const d = Math.abs(x + .5 - 24); if (d < 3.6) return (y % 3 == 0 && y > 22) ? dark(t.l, .84) : t.l; return y > 30 ? dark(t.b, .82) : t.b; });
+    for (const lx of [20.6, 27.4]) { r.line(lx, 27, lx, 36.5, 3, t.l); r.ell(lx, 37.5, 2.8, 1.4, dark(t.l, .96)); r.px(lx - .5, 37, dark(t.l, .75)); r.px(lx + .5, 37, dark(t.l, .75)); }
+    r.ell(24, 19.5, 8.2, 3.6, t.l); for (const dx of [-5, -3, 3, 5]) r.px(24 + dx, 21, dark(t.l, .86)); // boyun tüyü
+    // kulaklar
+    r.poly([[15.8, 9.6 + br * .3], [17, .6 + br * .3 + (hd.dy || 0)], [22.4, 6.2 + br * .3]], t.b); r.poly(mir([[15.8, 9.6 + br * .3], [17, .6 + br * .3 + (hd.dy || 0)], [22.4, 6.2 + br * .3]]), t.b);
+    r.poly([[17.4, 8], [17.8, 3.6 + br * .3], [20.8, 6.6]], t.i); r.poly(mir([[17.4, 8], [17.8, 3.6 + br * .3], [20.8, 6.6]]), t.i);
+    // kafa
+    r.ell(24, hy, 8.4, 6.8, (x, y, u, v) => (v < -.45 && Math.abs(u) < .55) ? t.s : (v > .5 ? t.l : t.b));
+    r.ell(17, hy + 4, 2.8, 2.6, t.l); r.ell(31, hy + 4, 2.8, 2.6, t.l); // yanak tüyü
+    r.ell(24, hy + 3.6, 4.6, 3.4, t.l); // ağız bölgesi
+    const dk = C('#0c0c10'); r.px(23, hy + 2.1, dk); r.px(24, hy + 2.1, dk); r.px(23, hy + 3, dk); r.px(24, hy + 3, dk);
+    crEye(r, t, P, 19, hy - 1.4); crEye(r, t, P, 27, hy - 1.4);
+    if (P.mouth == 'open') { r.ell(24, hy + 6, 2.2, 1.4, C('#5a1f2a')); r.px(24, hy + 6.6, C('#f08aa0')); }
+    else { r.px(22, hy + 5.4, t.o_); r.px(23, hy + 5.9, t.o_); r.px(24, hy + 5.9, t.o_); r.px(25, hy + 5.4, t.o_); }
+  }
+  function frontDragon(r, t, P) {
+    const br = P.breath || 0, hd = P.head || {}, hy = 13.5 + br * .4 + (hd.dy || 0), f = br * 1.6;
+    // kanatlar (arkada): iki yana açık, kemik çizgili
+    const W = [[18, 26], [12.5, 16.5], [6, 11.5 - f], [1.2, 7.5 - f], [1.6, 17], [4.6, 22.5], [8.4, 24.5], [10, 29.5], [14.6, 30.5]];
+    r.poly(W, t.w); r.poly(mir(W), t.w);
+    for (const [a, b] of [[[18, 26], [12.5, 16.5]], [[12.5, 16.5], [1.2, 7.5 - f]], [[12.5, 16.5], [1.6, 17]], [[12.5, 16.5], [5, 23]], [[12.5, 16.5], [10, 28]]]) { r.line(...a, ...b, 1, t.b); r.line(48 - a[0], a[1], 48 - b[0], b[1], 1, t.b); }
+    // kuyruk: sağ altta kıvrık, ucu uçlu
+    const tp = [[30, 36], [35, 37.5], [39.5, 35.5], [41, 31.5], [39.5, 28.5]];
+    for (let i = 0; i < tp.length - 1; i++) r.line(...tp[i], ...tp[i + 1], Math.max(1.8, 3.8 - i * .6), t.b);
+    r.poly([[38, 29], [39.6, 25], [41.4, 29]], t.s);
+    // gövde + karın plakaları
+    r.ell(24, 29, 7.8, 8.6, (x, y, u, v) => { if (Math.abs(u) < .55 && v > -.55) return (y % 2 == 0) ? dark(t.l, .86) : t.l; return v > .45 ? dark(t.b, .82) : (((x >> 1) + y) % 3 == 0 ? dark(t.b, .9) : t.b); });
+    for (const lx of [16.8, 31.2]) { r.line(lx + (lx < 24 ? 2.4 : -2.4), 28, lx, 36.5, 3, t.b); r.ell(lx - (lx < 24 ? .6 : -.6), 37.5, 3, 1.4, dark(t.b, .9)); for (const d of [-1.4, 0, 1.4]) r.px(lx - (lx < 24 ? .6 : -.6) + d, 38.3, t.h); }
+    // boynuzlar ve yele
+    const hn = [[18.4, hy - 5.5], [14, 1 + (hd.dy || 0)], [21, hy - 7]];
+    r.poly(hn, t.h); r.poly(mir(hn), t.h);
+    r.poly([[22.4, hy - 6.4], [24, 3.2 + (hd.dy || 0)], [25.6, hy - 6.4]], t.s);
+    const fr = [[16.6, hy - .5], [10.6, hy - 1.5], [11.6, hy + 2], [16.8, hy + 3.6]]; r.poly(fr, t.s); r.poly(mir(fr), t.s);
+    // kafa
+    r.ell(24, hy, 8.2, 6.8, (x, y, u, v) => v > .5 ? dark(t.b, .9) : (((x >> 1) + y) % 3 == 0 ? dark(t.b, .9) : t.b));
+    r.ell(24, hy + 4, 4.6, 2.9, t.l);
+    r.px(22.6, hy + 3.4, C('#2a0c0c')); r.px(25.4, hy + 3.4, C('#2a0c0c'));
+    for (const dx of [-7, -6, -5, 5, 6, 7]) r.px(24 + dx, hy - 4 + Math.abs(dx) * .3, t.s); // kaş
+    crEye(r, t, P, 19, hy - .6, true); crEye(r, t, P, 27, hy - .6, true);
+    if (P.mouth == 'open') { r.ell(24, hy + 6.2, 2.4, 1.4, C('#5a1f2a')); r.ell(24, hy + 8.4, 1.6, 1.8, C('#ff8a1e')); r.px(24, hy + 8, C('#fff1a8')); }
+    else { for (const [dx, dy] of [[-3, 5.2], [-2, 5.9], [-1, 6.2], [0, 6.2], [1, 6.2], [2, 5.9], [3, 5.2]]) r.px(24 + dx, hy + dy, t.o_); }
+  }
+  POSES.front = (r, t, P) => { if (t.sp == 'kurt') frontWolf(r, t, P); else frontDragon(r, t, P); return { whisk: null }; };
+  const sitCat = POSES.sit; POSES.sit = (r, t, P) => t.sp ? POSES.front(r, t, P) : sitCat(r, t, P);
+
   POSES.loaf = (r, t, P) => {
     const br = P.breath || 0;
     tail(r, t, { ...P, tail: { a: 160, curl: -6, sway: 6, n: 9, ...(P.tail || {}) } }, 8.5, 33.5);
@@ -320,11 +374,27 @@
   };
 
   // ---- ana çizim ----
+  // kullanıcının kendi görselleri (yalnızca o cihazda saklanır): tüm pozlarda aynı resim, yürürken sekme, yatarken basık
+  const custom = new Map();
+  function drawCustom(cu, P) {
+    const cv = document.createElement('canvas'); cv.width = N; cv.height = H; const x = cv.getContext('2d');
+    x.fillStyle = 'rgba(0,0,0,.24)'; x.beginPath(); x.ellipse(24, B + 1, Math.min(14, cu.width / 2 + 2), 1.7, 0, 0, 6.3); x.fill();
+    const pose = P.pose || 'stand', sq = pose == 'loaf' || pose == 'curl' ? .72 : 1, bob = pose == 'stand' ? Math.abs(Math.sin((P.ph || 0) * Math.PI * 2)) * -1.5 : (P.breath || 0) * -.4;
+    const w = cu.width, h = cu.height * sq, dx = Math.round((N - w) / 2 + (pose == 'climb' ? 3 : 0));
+    x.imageSmoothingEnabled = false; x.drawImage(cu, 0, 0, cu.width, cu.height, dx, Math.round(B + 1 - h + bob), w, h);
+    return cv;
+  }
+  function addCustom(id, name, bmp) { // bmp: ImageBitmap/canvas; 46x38 kutuya sığacak şekilde küçültülür
+    const k = Math.min(46 / bmp.width, 38 / bmp.height, 1), w = Math.max(1, Math.round(bmp.width * k)), h = Math.max(1, Math.round(bmp.height * k));
+    const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'); g.imageSmoothingQuality = 'high'; g.drawImage(bmp, 0, 0, w, h);
+    custom.set(id, c); if (!api.types.some(t => t[0] == id)) api.types.push([id, name]);
+  }
   const cache = new Map();
   function draw(id, P) {
+    if (custom.has(id)) return drawCustom(custom.get(id), P);
     const t = T[id] || T.zencefil, r = ctx();
     if (P.shadow !== false) { const k = pack(0, 0, 0, 60); for (let x = 9; x <= 38; x++) { const d = Math.abs(x - 23.5) / 15; if (d < 1) { r.px(x, B + 1, k); if (d < .7) r.px(x, B + 2, k); } } }
-    if (t.sp == 'ejder') wings(r, t, P);
+    if (t.sp == 'ejder' && (P.pose || 'stand') != 'sit') wings(r, t, P);
     const f = POSES[P.pose || 'stand']; const w = f(r, t, P);
     finish(r, t);
     if (w && !P.noWhisk) whiskers(r, w.whisk);
@@ -333,5 +403,5 @@
     return cv;
   }
 
-  window.KediArt = { draw, N, H, B, types: Object.keys(T).map(k => [k, T[k].name]), thumb(id) { try { const c = draw(id, { pose: 'sit', tail: { sway: 0 }, shadow: false }), o = document.createElement('canvas'); o.width = N; o.height = 42; o.getContext('2d').drawImage(c, 0, 0); return o.toDataURL(); } catch { return ''; } } };
+  const api = window.KediArt = { addCustom, hasCustom: id => custom.has(id), removeCustom(id) { custom.delete(id); const i = api.types.findIndex(t => t[0] == id); if (i >= 0) api.types.splice(i, 1); }, draw, N, H, B, types: Object.keys(T).map(k => [k, T[k].name]), thumb(id) { try { const c = draw(id, { pose: 'sit', tail: { sway: 0 }, shadow: false }), o = document.createElement('canvas'); o.width = N; o.height = 42; o.getContext('2d').drawImage(c, 0, 0); return o.toDataURL(); } catch { return ''; } } };
 })();

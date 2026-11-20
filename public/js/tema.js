@@ -41,7 +41,7 @@ async function setBg(th){
 const calm=()=>TH.p||matchMedia('(prefers-reduced-motion: reduce)').matches;
 const vidPlay=v=>{if(!calm()&&!document.hidden)v.play().catch(()=>{});else v.pause()};
 document.addEventListener('visibilitychange',()=>{const v=$('#bg video');v&&vidPlay(v)});
-function loadTheme(){TH={...DT,...(lsGet('theme')||{})};applyVars(TH);setBg(TH)}
+function loadTheme(){TH={...DT,...(lsGet('theme')||{})};applyVars(TH);setBg(TH);loadOzel()}
 function saveTheme(){lsSet('theme',TH);clearTimeout(sy);sy=setTimeout(()=>ME&&!offline&&api('PATCH','/me',{theme:TH}).catch(()=>{}),1000)}
 async function toBlob(f,max){const b=await createImageBitmap(f),k=Math.min(1,max/Math.max(b.width,b.height)),c=document.createElement('canvas');c.width=Math.round(b.width*k);c.height=Math.round(b.height*k);c.getContext('2d').drawImage(b,0,0,c.width,c.height);return new Promise(r=>c.toBlob(r,'image/webp',.85))}
 function vTheme(){
@@ -51,6 +51,8 @@ function vTheme(){
  <h4>YouTube hesabı ▶</h4><div id="ytb" style="margin-bottom:6px"></div>
  <h4>Yoldaşlar: kedi, kurt, ejderha</h4><label class="f">Yoldaşları göster<input type="checkbox" data-k="kd" ${TH.kd!==false?'checked':''}></label>
  <div class="chips">${(()=>{const KL=TH.kl&&TH.kl.length?TH.kl:['zencefil'];return Kedi.types.map(([id,n])=>`<button class="chip" data-cat="${id}" aria-pressed="${KL.includes(id)}" title="${n}" style="padding:6px 8px;display:inline-flex;flex-direction:column;align-items:center;gap:2px${KL.includes(id)?';outline:2px solid var(--a)':''}"><img src="${KediArt.thumb(id)}" alt="" width="96" height="84" style="display:block;image-rendering:pixelated"><small>${n}</small></button>`).join('')})()}</div>
+ <div style="margin:6px 0"><button class="btn g" id="oz">${ic('plus')} Kendi görselini ekle</button><input type="file" id="ozf" accept="image/*" hidden> ${(lsGet('ozel')||[]).map(o=>`<button class="chip" data-ozdel="${esc(o.id)}" title="Kaldır">${esc(o.name)} ${ic('close')}</button>`).join('')}</div>
+ <p class="muted" style="font-size:12px">Eklediğin görsel yalnızca bu cihazda saklanır. Arka planı düz renkse kendiliğinden silinir; yazısız, tek bir figür içeren resim en iyisi.</p>
  <p class="muted" style="font-size:13px">En fazla 3 yoldaş seçebilirsin. Üzerine gelince sevebilirsin 💗 Kediler tıklamanı engellemez. <button class="btn g" id="kfare" style="margin-left:4px">🐭 Fare çıkar</button></p>
  <h4>Renkler</h4>${c('a','Vurgu rengi')}${c('c','Arka plan')}${c('s','Kart / panel')}${c('x','Yazı')}
  <h4>Görünüm</h4>${r('r','Köşe yuvarlaklığı',0,28)}${r('fs','Yazı boyutu',13,19)}
@@ -64,7 +66,9 @@ function vTheme(){
   cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{applyVars(TH);const v=$('#bg video');v&&vidPlay(v)})};
  tc.onchange=e=>{if(e.target.dataset.k)saveTheme()};
  ytCard();
- tc.onclick=e=>{if(e.target.closest('#kfare')){Kedi.mouse();return}const ct=e.target.closest('[data-cat]');if(ct){const id=ct.dataset.cat;let l=TH.kl&&TH.kl.length?[...TH.kl]:['zencefil'];if(l.includes(id)){if(l.length>1)l=l.filter(x=>x!=id)}else{if(l.length>=Kedi.max)l.shift();l.push(id)}TH.kl=l;if(TH.kd===false)TH.kd=true;Kedi.sync(TH);saveTheme();vTheme();return}const lg=e.target.closest('[data-lg]');if(lg){openLogo(lg.dataset.lg);return}const p=e.target.closest('[data-p]');if(p){Object.assign(TH,{fx:''},PRE[p.dataset.p].t);applyVars(TH);saveTheme();vTheme()}};
+ tc.onclick=e=>{if(e.target.closest('#kfare')){Kedi.mouse();return}const ct=e.target.closest('[data-cat]');if(ct){const id=ct.dataset.cat;let l=TH.kl&&TH.kl.length?[...TH.kl]:['zencefil'];if(l.includes(id)){if(l.length>1)l=l.filter(x=>x!=id)}else{if(l.length>=Kedi.max)l.shift();l.push(id)}TH.kl=l;if(TH.kd===false)TH.kd=true;Kedi.sync(TH);saveTheme();vTheme();return}const od=e.target.closest('[data-ozdel]');if(od){ozelSil(od.dataset.ozdel);return}const lg=e.target.closest('[data-lg]');if(lg){openLogo(lg.dataset.lg);return}const p=e.target.closest('[data-p]');if(p){Object.assign(TH,{fx:''},PRE[p.dataset.p].t);applyVars(TH);saveTheme();vTheme()}};
+ $('#oz').onclick=()=>$('#ozf').click();
+ $('#ozf').onchange=async e=>{const f=e.target.files[0];if(f)await ozelEkle(f)};
  $('#bu').onclick=()=>$('#bf').click();
  $('#bf').onchange=async e=>{const f=e.target.files[0];if(!f)return;
   try{let blob=f,m='image';if(f.type.startsWith('video')){m='video';if(f.size>40e6)return toast('Video en fazla 40 MB olmalı (akıcılık için)')}else blob=await toBlob(f,1920);
@@ -101,3 +105,28 @@ function startFx(kind){
    else{p.y-=p.v*dt;p.x+=Math.sin(t/900+p.s)*.00022*dt;if(p.y<-.03){Object.assign(p,mk(),{y:1.02})}const f=.6+.4*Math.sin(t/220+p.s);x.fillStyle='rgba('+(255)+','+(140+90*f|0)+','+(40+30*f|0)+','+(p.a*(.5+.5*p.y)).toFixed(2)+')'}
    x.beginPath();x.arc((p.x%1)*w,p.y*h,p.r*d,0,6.283);x.fill()}};
  fxRaf=requestAnimationFrame(loop)}
+
+// ---- Kullanıcının kendi yoldaş görselleri: seçilen resim cihazda saklanır (projeye/sürüme girmez)
+async function ozelHazirla(file){
+ const bm=await createImageBitmap(file),k=Math.min(1,256/Math.max(bm.width,bm.height)),w=Math.max(1,bm.width*k|0),h=Math.max(1,bm.height*k|0);
+ const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(bm,0,0,w,h);
+ const im=x.getImageData(0,0,w,h),d=im.data,P=(px,py)=>(py*w+px)*4,corners=[P(0,0),P(w-1,0),P(0,h-1),P(w-1,h-1)];
+ if(corners.every(i=>d[i+3]>200)){ // arka planı sil: köşe rengine yakın ve kenardan ulaşılan pikseller
+  const bg=[0,1,2].map(j=>corners.reduce((a,i)=>a+d[i+j],0)/4),near=i=>Math.hypot(d[i]-bg[0],d[i+1]-bg[1],d[i+2]-bg[2])<46,seen=new Uint8Array(w*h),st=[];
+  for(let i=0;i<w;i++){st.push(i,w*(h-1)+i)}for(let j=0;j<h;j++){st.push(j*w,j*w+w-1)}
+  while(st.length){const p=st.pop();if(seen[p])continue;const i=p*4;if(!near(i))continue;seen[p]=1;d[i+3]=0;const px=p%w,py=p/w|0;if(px>0)st.push(p-1);if(px<w-1)st.push(p+1);if(py>0)st.push(p-w);if(py<h-1)st.push(p+w)}
+  x.putImageData(im,0,0)}
+ let x0=w,y0=h,x1=-1,y1=-1;for(let py=0;py<h;py++)for(let px=0;px<w;px++)if(d[P(px,py)+3]>10){if(px<x0)x0=px;if(px>x1)x1=px;if(py<y0)y0=py;if(py>y1)y1=py}
+ if(x1<0)throw new Error('bos');const o=document.createElement('canvas');o.width=x1-x0+1;o.height=y1-y0+1;o.getContext('2d').drawImage(c,x0,y0,o.width,o.height,0,0,o.width,o.height);return o}
+async function ozelEkle(file){
+ try{const cv=await ozelHazirla(file),blob=await new Promise(r=>cv.toBlob(r,'image/png')),L=lsGet('ozel')||[];if(L.length>=6)return toast('En fazla 6 kendi görsel ekleyebilirsin');
+  const id='oz'+Array.from({length:6},()=>String.fromCharCode(97+Math.random()*26|0)).join(''),name=(file.name||'Görsel').replace(/\.[^.]+$/,'').slice(0,14)||'Görsel';
+  await put('blobs',{id:'yol:'+id,blob});L.push({id,name});lsSet('ozel',L);KediArt.addCustom(id,name,cv);Kedi.addType(id);
+  TH.kl=[...(TH.kl&&TH.kl.length?TH.kl:['zencefil']).slice(-(Kedi.max-1)),id];if(TH.kd===false)TH.kd=true;Kedi.sync(TH);saveTheme();vTheme();toast('Eklendi ✓')}
+ catch{toast('Görsel okunamadı')}}
+async function ozelSil(id){
+ await del('blobs','yol:'+id).catch(()=>{});lsSet('ozel',(lsGet('ozel')||[]).filter(o=>o.id!=id));KediArt.removeCustom(id);Kedi.delType(id);
+ TH.kl=(TH.kl||[]).filter(x=>x!=id);if(!TH.kl.length)TH.kl=['zencefil'];Kedi.sync(TH);saveTheme();vTheme()}
+async function loadOzel(){
+ try{for(const o of lsGet('ozel')||[]){const b=await get('blobs','yol:'+o.id);if(!b)continue;KediArt.addCustom(o.id,o.name,await createImageBitmap(b.blob));Kedi.addType(o.id)}
+  if((lsGet('ozel')||[]).length)Kedi.sync(TH)}catch{}}
