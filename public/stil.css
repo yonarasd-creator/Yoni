@@ -154,3 +154,28 @@ nav button{display:flex;align-items:center;justify-content:flex-start}nav button
 @keyframes updin{from{transform:translateY(-14px);opacity:0}}@keyframes updz{50%{transform:scale(1.2) rotate(-8deg)}}
 /* Efektli temalar: paneller temadan renk alır, yarı saydam durur ki arka plandaki kar/kor görünsün */
 html.fx nav,html.fx main,html.fx #side,html.fx #bar{background:var(--s);backdrop-filter:blur(5px)}
+/* Profil kozmetikleri */
+.pcd.kz{position:relative;background:var(--kzbg);border:2px solid var(--ac);box-shadow:0 0 18px -4px var(--ac)}
+.pcd.kz:after{content:"";position:absolute;inset:5px;border:1px solid var(--ac);opacity:.35;border-radius:12px;pointer-events:none}
+.pcd.kz .ban{background:var(--kzban);position:relative;overflow:hidden}
+.kzb{position:absolute;left:0;right:0;bottom:0;width:100%;height:100%}
+.kzp{position:absolute;inset:0;opacity:.09;pointer-events:none}
+.avk{position:relative;width:88px;height:88px;margin:-46px 0 0 16px;z-index:2}
+.avk .av.lg{margin:0}
+.avk>svg.kzf{position:absolute;inset:-16px;width:120px;height:120px;pointer-events:none;z-index:3;overflow:visible;filter:drop-shadow(0 0 5px var(--ac))}
+.pcd.kz .pnm{position:relative;z-index:1}
+.pcd.kz .pnm h3{background:var(--kznm);-webkit-background-clip:text;background-clip:text;color:transparent}
+.kzx{position:absolute;inset:0;pointer-events:none;opacity:.8;animation:kzfl 7s ease-in-out infinite alternate}
+@keyframes kzfl{from{transform:translateY(-6px)}to{transform:translateY(8px)}}
+.kzcrest{position:absolute;top:4px;left:50%;width:84px;height:34px;margin-left:-42px;pointer-events:none;z-index:3}
+.kzc{position:absolute;inset:0;pointer-events:none;z-index:3}
+.kzc svg{position:absolute;overflow:visible;transform:scale(.7)}
+.kzbot{position:absolute;bottom:3px;left:50%;width:110px;margin-left:-55px;pointer-events:none}
+.kzlv{position:absolute;right:12px;top:98px;width:30px;pointer-events:none;z-index:3;filter:drop-shadow(0 2px 4px #0008)}
+.kzl{margin-top:14px}.kzl h4{margin:0 0 2px}
+.kzg{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px;margin-top:10px}
+.kzt{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 6px 10px;border-radius:12px;background:var(--s);border:2px solid transparent;color:inherit;cursor:pointer;font:inherit}
+.kzt.on{border-color:var(--ac,var(--a))}.kzt.lk{opacity:.55}.kzt small{font-size:11px;opacity:.8;display:flex;align-items:center;gap:3px}
+.kzv{position:relative;width:48px;height:48px;margin:8px 0 12px}.kzv img{width:48px;height:48px;border-radius:50%;object-fit:cover}
+.kzv svg.kzf{position:absolute;inset:-8px;width:64px;height:64px;overflow:visible}
+.kzt i{display:block;width:80%;height:4px;border-radius:2px;background:#fff2}.kzt i u{display:block;height:100%;border-radius:2px;background:var(--ac)}

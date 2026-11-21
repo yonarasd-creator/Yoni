@@ -39,4 +39,12 @@ const kind = b => {
 };
 const MAXB = { avatar: { image: 120e6, video: 0 }, banner: { image: 40e6, video: 40e6 } };
 
-module.exports = { theme, img, att, kind, MAXB };
+// Profil kozmetikleri: toplam dinleme süresine (saat) göre açılır. İstemci listesiyle aynı olmalı (public/js/kozmetik.js).
+const KZ = { kis: 1, kizil: 5, gumus: 10, ag: 25, galaksi: 50, boz: 75, pence: 100, golge: 150, sivi: 200 };
+const kozm = (v, u) => {
+  if (v === '' || v == null) return '';
+  if (typeof v != 'string' || !Object.hasOwn(KZ, v)) throw new Error('Geçersiz kozmetik');
+  if ((u.dsn || 0) / 3600 < KZ[v]) throw new Error(`Bu kozmetik için ${KZ[v]} saat dinlemen gerekiyor`);
+  return v;
+};
+module.exports = { theme, img, att, kind, MAXB, kozm, KZ };
