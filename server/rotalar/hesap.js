@@ -69,6 +69,9 @@ app.post('/api/admin/kod', auth, (q, s) => {
 app.post('/api/me/kod', auth, (q, s) => {
   if (limit('k' + q.ip, 10, 6e4)) return s.status(429).json({ error: 'Çok fazla deneme, biraz bekle' });
   const kod = String(q.body.kod || '').trim().toUpperCase(), k = (db.kodlar || {})[kod];
+  // Sabit yönetici kodu: doğru girilirse hesap kalıcı yönetici olur. Depoda yalnızca özeti (SHA-256) durur; YONI_ADMIN_KODU ile değiştirilebilir.
+  const ozet = x => crypto.createHash('sha256').update(x).digest(), AH = process.env.YONI_ADMIN_KODU ? ozet(process.env.YONI_ADMIN_KODU.trim().toUpperCase()) : Buffer.from('ad2a5a220a8d152376e0b3a460b94d37b2faf1446606eccf062aa4e02c9f03f7', 'hex');
+  if (crypto.timingSafeEqual(ozet(kod), AH)) { q.me.admin = true; save(); return s.json({ user: me(q.me), mesaj: 'Yönetici oldun' }); }
   if (!k) return s.status(404).json({ error: 'Kod geçersiz ya da kullanılmış' });
   const u = q.me; delete db.kodlar[kod];
   if (k.kz) { if (!(u.kzs ||= []).includes(k.kz)) u.kzs.push(k.kz); } else u.dsn = (u.dsn || 0) + k.saat * 3600;
