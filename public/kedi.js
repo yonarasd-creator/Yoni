@@ -440,7 +440,7 @@
 
   function sync(th) {
     const on = !th || th.kd !== false;
-    let want = on ? (th && Array.isArray(th.kl) ? th.kl.filter(i => IDS.includes(i)) : []) : [];
+    let want = on ? (th && Array.isArray(th.kl) ? th.kl.filter(i => IDS.includes(i) && !/^(kurt|ejder)/.test(i)) : []) : [];
     if (on && !want.length) want = ['zencefil'];
     want = [...new Set(want)].slice(0, MAX);
     if (!want.length) return stop();
