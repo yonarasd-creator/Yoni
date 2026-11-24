@@ -41,8 +41,16 @@ const MAXB = { avatar: { image: 120e6, video: 0 }, banner: { image: 40e6, video:
 
 // Profil kozmetikleri: toplam dinleme süresine (saat) göre açılır. İstemci listesiyle aynı olmalı (public/js/kozmetik.js).
 const KZ = { kis: 1, kizil: 5, gumus: 10, ag: 25, galaksi: 50, boz: 75, pence: 100, golge: 150, sivi: 200 };
-// Yönetici: u.admin işareti, YONI_ADMIN ortam değişkeni (virgülle kullanıcı adları) veya ilk açılan hesap
-const isAdmin = u => !!u && (u.admin === true || (process.env.YONI_ADMIN || '').split(',').map(x => x.trim()).includes(u.username) || Object.keys(db.users)[0] == u.username);
+// Yönetici: yalnızca açıkça belirtilenler. Kaynaklar: u.admin === true, YONI_ADMIN ortam değişkeni (virgülle kullanıcı adları)
+// veya veri klasöründeki yonetici.txt (her satıra bir kullanıcı adı). İlk hesap otomatik yönetici SAYILMAZ.
+const { DATA } = require('./depo');
+let admL = [], admT = 0;
+const adminler = () => {
+  if (Date.now() - admT < 5000) return admL; admT = Date.now();
+  let f = []; try { f = fs.readFileSync(path.join(DATA, 'yonetici.txt'), 'utf8').split(/\r?\n/); } catch {}
+  return admL = [...(process.env.YONI_ADMIN || '').split(','), ...f].map(x => x.trim().toLowerCase()).filter(Boolean);
+};
+const isAdmin = u => !!u && (u.admin === true || adminler().includes(String(u.username).toLowerCase()));
 const sahip = (u, id) => isAdmin(u) || (u.kzs || []).includes(id);
 // Takılan kozmetik: yönetici her birini, diğerleri yalnızca satın aldıklarını/kodla açtıklarını takabilir
 const kozm = (v, u) => {
