@@ -4,7 +4,7 @@
 // Ayarlardan açılıp kapanır (tema: kd = göster, kl = seçili kediler, en fazla 3). Kediler tıklamayı engellemez.
 (() => {
   const KA = window.KediArt;
-  if (!KA) { window.Kedi = { say() { return false; }, sync() {}, types: [], max: 3, mouse() {} }; return; }
+  if (!KA) { window.Kedi = { say() { return false; }, addType() {}, delType() {}, sync() {}, types: [], max: 3, mouse() {} }; return; }
   const TYPES = KA.types, IDS = TYPES.map(t => t[0]), MAX = 3, PX = 2, G = 1500;
   const SW = KA.N * PX, SH = KA.H * PX, FEET = 39 * PX;
   const rnd = (a, b) => a + Math.random() * (b - a), clamp = (v, a, b) => Math.max(a, Math.min(b, v)), pick = a => a[Math.random() * a.length | 0];
@@ -466,5 +466,5 @@
     const el = bubble(c, `${msg}<div><button>${esc(yes)}</button><button class="g">Sonra</button></div>`, life || 30);
     const [b1, b2] = el.querySelectorAll('button'); b1.onclick = () => { closeSug(); onYes(); }; b2.onclick = closeSug; return true;
   }
-  window.Kedi = { say, sync, types: TYPES, max: MAX, mouse: spawnMouse, _dbg: () => ({ suggest, cats, plats, mouse, travel: planTravel, climb: c => { c.plan = null; } }) };
+  window.Kedi = { say, addType(id) { if (!IDS.includes(id)) IDS.push(id); }, delType(id) { const i = IDS.indexOf(id); if (i >= 0) IDS.splice(i, 1); }, sync, types: TYPES, max: MAX, mouse: spawnMouse, _dbg: () => ({ suggest, cats, plats, mouse, travel: planTravel, climb: c => { c.plan = null; } }) };
 })();

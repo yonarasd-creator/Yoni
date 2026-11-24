@@ -4,7 +4,7 @@ const { db, save, UP } = require('../depo');
 const { HEX, pk, S, num, fit, hash, limit, cookie } = require('../yardimci');
 const { conns, push, pub, me, isFriend, notify } = require('../canli');
 const { userOf, auth, startSession } = require('../oturum');
-const { theme, img, att, kind, MAXB } = require('../dogrula');
+const { theme, img, att, kind, MAXB, kozm } = require('../dogrula');
 
 module.exports = (app, express) => {
 app.post('/api/register', async (q, s) => {
@@ -34,12 +34,18 @@ app.patch('/api/me', auth, (q, s) => {
     if ('status' in b) u.status = S(b.status, 60);
     if ('color' in b) { if (!HEX.test(b.color)) throw new Error('Geçersiz renk'); u.color = b.color; }
     if ('theme' in b) u.theme = theme(b.theme);
+    if ('kz' in b) u.kz = kozm(b.kz, u);
     if ('avatar' in b) img(u, 'avatar', b.avatar);
     if ('banner' in b) img(u, 'banner', b.banner);
     if ('afit' in b) u.afit = fit(b.afit);
     if ('bfit' in b) u.bfit = fit(b.bfit);
     save(); notify(u.username); s.json({ user: me(u) });
   } catch (e) { s.status(400).json({ error: e.message }); }
+});
+// Dinleme süresi: istemci biriktirdiği saniyeyi gönderir; sunucu, son güncellemeden geçen süreden fazlasını kabul etmez
+app.post('/api/me/dinleme', auth, (q, s) => {
+  const u = q.me, now = Date.now(), gecen = u.dts ? (now - u.dts) / 1000 : 600, ek = Math.max(0, Math.min(+q.body.s || 0, gecen + 20, 3600));
+  u.dsn = (u.dsn || 0) + ek; u.dts = now; save(); s.json({ dsn: Math.floor(u.dsn) });
 });
 app.put('/api/me/media/:kind', auth, (q, s, n) => {
   if (!MAXB[q.params.kind]) return s.status(404).json({ error: 'Bulunamadı' });

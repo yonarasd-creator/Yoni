@@ -7,6 +7,7 @@ const theme = t => {
   const o = {}; for (const k of ['a', 'c', 's', 'x']) if (HEX.test(t[k])) o[k] = t[k];
   o.r = num(t.r, 0, 28, 12); o.fs = num(t.fs, 13, 19, 15); o.dim = num(t.dim, 0, 80, 30); o.op = num(t.op, 30, 100, 80); o.bl = num(t.bl, 0, 20, 0);
   o.m = ['image', 'video'].includes(t.m) ? t.m : ''; o.p = !!t.p; o.lg = typeof t.lg == 'string' && /^[a-z0-9-]{1,30}$/.test(t.lg) ? t.lg : 'varsayilan';
+  o.fx = ['kar', 'kor'].includes(t.fx) ? t.fx : '';
   o.kd = t.kd !== false; o.kl = Array.isArray(t.kl) ? [...new Set(t.kl.filter(x => typeof x == 'string' && /^[a-z]{2,12}$/.test(x)))].slice(0, 3) : ['zencefil']; return o;
 };
 const img = (u, k, d) => {
@@ -38,4 +39,12 @@ const kind = b => {
 };
 const MAXB = { avatar: { image: 120e6, video: 0 }, banner: { image: 40e6, video: 40e6 } };
 
-module.exports = { theme, img, att, kind, MAXB };
+// Profil kozmetikleri: toplam dinleme süresine (saat) göre açılır. İstemci listesiyle aynı olmalı (public/js/kozmetik.js).
+const KZ = { kis: 1, kizil: 5, gumus: 10, ag: 25, galaksi: 50, boz: 75, pence: 100, golge: 150, sivi: 200 };
+const kozm = (v, u) => {
+  if (v === '' || v == null) return '';
+  if (typeof v != 'string' || !Object.hasOwn(KZ, v)) throw new Error('Geçersiz kozmetik');
+  if ((u.dsn || 0) / 3600 < KZ[v]) throw new Error(`Bu kozmetik için ${KZ[v]} saat dinlemen gerekiyor`);
+  return v;
+};
+module.exports = { theme, img, att, kind, MAXB, kozm, KZ };
