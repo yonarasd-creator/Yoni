@@ -179,3 +179,7 @@ html.fx nav,html.fx main,html.fx #side,html.fx #bar{background:var(--s);backdrop
 .kzv{position:relative;width:48px;height:48px;margin:8px 0 12px}.kzv img{width:48px;height:48px;border-radius:50%;object-fit:cover}
 .kzv svg.kzf{position:absolute;inset:-8px;width:64px;height:64px;overflow:visible}
 .kzt i{display:block;width:80%;height:4px;border-radius:2px;background:#fff2}.kzt i u{display:block;height:100%;border-radius:2px;background:var(--ac)}
+.rzm{width:26px;height:26px;object-fit:cover;object-position:center 30%;border-radius:50%;vertical-align:middle;margin-left:8px;-webkit-text-fill-color:initial}
+.rzg{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;margin:8px 0 14px}
+.rzt{background:#0b0b0e;border-radius:12px;padding:4px}.rzt img{width:100%;display:block;border-radius:8px}.rzt.lk{opacity:.35;filter:grayscale(1)}
+.kzl input,.kzl select{background:var(--s);color:inherit;border:1px solid #fff2;border-radius:8px;padding:8px}
