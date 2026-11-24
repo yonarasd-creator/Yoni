@@ -4,7 +4,7 @@ const { db, save, UP } = require('../depo');
 const { HEX, pk, S, num, fit, hash, limit, cookie } = require('../yardimci');
 const { conns, push, pub, me, isFriend, notify } = require('../canli');
 const { userOf, auth, startSession } = require('../oturum');
-const { theme, img, att, kind, MAXB, kozm } = require('../dogrula');
+const { theme, img, att, kind, MAXB, kozm, KZ, isAdmin } = require('../dogrula');
 
 module.exports = (app, express) => {
 app.post('/api/register', async (q, s) => {
@@ -46,6 +46,33 @@ app.patch('/api/me', auth, (q, s) => {
 app.post('/api/me/dinleme', auth, (q, s) => {
   const u = q.me, now = Date.now(), gecen = u.dts ? (now - u.dts) / 1000 : 600, ek = Math.max(0, Math.min(+q.body.s || 0, gecen + 20, 3600));
   u.dsn = (u.dsn || 0) + ek; u.dts = now; save(); s.json({ dsn: Math.floor(u.dsn) });
+});
+// Bakiye = toplam dinleme - harcanan. Toplam hiç düşmez (rozetler ona bağlı); kozmetik alınca yalnızca harcanan artar.
+app.post('/api/me/kozmetik/al', auth, (q, s) => {
+  const u = q.me, id = q.body.id;
+  if (typeof id != 'string' || !Object.hasOwn(KZ, id)) return s.status(400).json({ error: 'Geçersiz kozmetik' });
+  if ((u.kzs || []).includes(id)) return s.status(409).json({ error: 'Bu kozmetiğe zaten sahipsin' });
+  const bedel = KZ[id] * 3600;
+  if ((u.dsn || 0) - (u.hrc || 0) < bedel) return s.status(402).json({ error: `Yetmiyor: ${KZ[id]} saat gerekiyor` });
+  u.hrc = (u.hrc || 0) + bedel; (u.kzs ||= []).push(id); save(); s.json({ user: me(u) });
+});
+// Yönetici kod üretir (bir kozmetik ya da saat verir, tek kullanımlık); herkes kodu girip kullanır
+app.post('/api/admin/kod', auth, (q, s) => {
+  if (!isAdmin(q.me)) return s.status(403).json({ error: 'Yalnızca yönetici' });
+  const { kz, saat } = q.body, k = { by: q.me.username, t: Date.now() };
+  if (kz) { if (!Object.hasOwn(KZ, kz)) return s.status(400).json({ error: 'Geçersiz kozmetik' }); k.kz = kz; }
+  else if (+saat > 0 && +saat <= 10000) k.saat = Math.floor(+saat);
+  else return s.status(400).json({ error: 'Kozmetik ya da saat ver' });
+  const kod = crypto.randomBytes(5).toString('hex').toUpperCase().replace(/(.{5})(.{5})/, '$1-$2');
+  (db.kodlar ||= {})[kod] = k; save(); s.json({ kod });
+});
+app.post('/api/me/kod', auth, (q, s) => {
+  if (limit('k' + q.ip, 10, 6e4)) return s.status(429).json({ error: 'Çok fazla deneme, biraz bekle' });
+  const kod = String(q.body.kod || '').trim().toUpperCase(), k = (db.kodlar || {})[kod];
+  if (!k) return s.status(404).json({ error: 'Kod geçersiz ya da kullanılmış' });
+  const u = q.me; delete db.kodlar[kod];
+  if (k.kz) { if (!(u.kzs ||= []).includes(k.kz)) u.kzs.push(k.kz); } else u.dsn = (u.dsn || 0) + k.saat * 3600;
+  save(); s.json({ user: me(u), mesaj: k.kz ? 'Kozmetik açıldı' : `${k.saat} saat eklendi` });
 });
 app.put('/api/me/media/:kind', auth, (q, s, n) => {
   if (!MAXB[q.params.kind]) return s.status(404).json({ error: 'Bulunamadı' });

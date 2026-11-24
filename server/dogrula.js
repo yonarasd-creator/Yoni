@@ -1,6 +1,6 @@
 // Gelen verinin doğrulanması: tema, profil görseli, şarkı eki, yüklenen dosyanın türü (sihirli baytlar).
 const path = require('path'), fs = require('fs');
-const { UP } = require('./depo');
+const { UP, db } = require('./depo');
 const { HEX, S, num } = require('./yardimci');
 const theme = t => {
   if (t === null) return null; if (typeof t != 'object') throw new Error('Geçersiz tema');
@@ -41,10 +41,14 @@ const MAXB = { avatar: { image: 120e6, video: 0 }, banner: { image: 40e6, video:
 
 // Profil kozmetikleri: toplam dinleme süresine (saat) göre açılır. İstemci listesiyle aynı olmalı (public/js/kozmetik.js).
 const KZ = { kis: 1, kizil: 5, gumus: 10, ag: 25, galaksi: 50, boz: 75, pence: 100, golge: 150, sivi: 200 };
+// Yönetici: u.admin işareti, YONI_ADMIN ortam değişkeni (virgülle kullanıcı adları) veya ilk açılan hesap
+const isAdmin = u => !!u && (u.admin === true || (process.env.YONI_ADMIN || '').split(',').map(x => x.trim()).includes(u.username) || Object.keys(db.users)[0] == u.username);
+const sahip = (u, id) => isAdmin(u) || (u.kzs || []).includes(id);
+// Takılan kozmetik: yönetici her birini, diğerleri yalnızca satın aldıklarını/kodla açtıklarını takabilir
 const kozm = (v, u) => {
   if (v === '' || v == null) return '';
   if (typeof v != 'string' || !Object.hasOwn(KZ, v)) throw new Error('Geçersiz kozmetik');
-  if ((u.dsn || 0) / 3600 < KZ[v]) throw new Error(`Bu kozmetik için ${KZ[v]} saat dinlemen gerekiyor`);
+  if (!sahip(u, v)) throw new Error('Bu kozmetiği önce satın alman gerekiyor');
   return v;
 };
-module.exports = { theme, img, att, kind, MAXB, kozm, KZ };
+module.exports = { theme, img, att, kind, MAXB, kozm, KZ, isAdmin, sahip };
