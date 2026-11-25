@@ -183,3 +183,4 @@ html.fx nav,html.fx main,html.fx #side,html.fx #bar{background:var(--s);backdrop
 .rzg{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;margin:8px 0 14px}
 .rzt{background:#0b0b0e;border-radius:12px;padding:4px}.rzt img{width:100%;display:block;border-radius:8px}.rzt.lk{opacity:.35;filter:grayscale(1)}
 .kzl input,.kzl select{background:var(--s);color:inherit;border:1px solid #fff2;border-radius:8px;padding:8px}
+.rzt{border:2px solid transparent;cursor:pointer;color:inherit}.rzt.on{border-color:var(--a)}.rzt.lk{cursor:default}

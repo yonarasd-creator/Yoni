@@ -59,4 +59,12 @@ const kozm = (v, u) => {
   if (!sahip(u, v)) throw new Error('Bu kozmetiği önce satın alman gerekiyor');
   return v;
 };
-module.exports = { theme, img, att, kind, MAXB, kozm, KZ, isAdmin, sahip };
+// Profilde gösterilen rozet: 0 = otomatik (en yüksek kazanılan); 1-9 = seçilen. Kazanılmamış rozeti yalnızca yönetici seçebilir.
+const RZS = [1, 5, 10, 25, 50, 100, 250, 500, 1000];
+const rozet = (v, u) => {
+  if (v === '' || v == null || v === 0) return 0;
+  if (!Number.isInteger(v) || v < 1 || v > RZS.length) throw new Error('Geçersiz rozet');
+  if (!isAdmin(u) && (u.dsn || 0) / 3600 < RZS[v - 1]) throw new Error(`Bu rozet için ${RZS[v - 1]} saat dinlemen gerekiyor`);
+  return v;
+};
+module.exports = { theme, img, att, kind, MAXB, kozm, KZ, isAdmin, sahip, rozet };
