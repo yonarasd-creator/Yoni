@@ -59,7 +59,7 @@ async function vList(){
   (ls.map((l,i)=>`<div class="row lrow" data-id="${esc(l.id)}"><img src="${esc(cv[i]||PH)}"><div class="i"><b>${esc(l.name)}</b><small>Liste · ${l.ids.length} şarkı${l.bio?' · '+esc(l.bio):''}</small></div></div>`).join('')||'<p class="muted">Henüz liste yok. Arama’dan ＋ ile ekle veya İçe Aktar’ı kullan.</p>')+
   `<input type="file" id="fi" accept="audio/*" multiple hidden>`;
  M.querySelectorAll('.lrow').forEach(c=>c.onclick=()=>{cur=c.dataset.id;vOne()});
- $('#nl').onclick=async()=>{const n=(prompt('Yeni liste adı')||'').trim();if(!n)return;const l={id:'p'+Date.now(),name:n,ids:[]};await put('lists',l);renderSbx();cur=l.id;vOne()};
+ $('#nl').onclick=async()=>{const n=(await askText('Yeni liste','Liste adı')||'').trim();if(!n)return;const l={id:'p'+Date.now(),name:n,ids:[]};await put('lists',l);renderSbx();cur=l.id;vOne()};
  $('#lf').onclick=()=>$('#fi').click();
  $('#fi').onchange=async e=>{const l=await pick();if(!l)return;const ts=[];let n=0;
   for(const f of e.target.files){const id='l'+Date.now()+(n++);await put('blobs',{id,blob:f});ts.push({id,title:f.name.replace(/\.[^.]+$/,''),artist:'Cihazım',art:''})}
