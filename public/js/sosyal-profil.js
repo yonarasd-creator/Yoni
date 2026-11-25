@@ -5,7 +5,7 @@ let ME=null,ws=null,offline=false,chatWith=null,FR={friends:[],incoming:[],outgo
 const api=async(m,u,b)=>{const r=await fetch('/api'+u,{method:m,headers:b?{'Content-Type':'application/json'}:{},body:b?JSON.stringify(b):undefined});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'Hata');return j};
 const lsGet=k=>{try{return JSON.parse(localStorage.getItem(k))}catch{return null}},lsSet=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v))}catch{}};
 const AV=u=>u.avatar||PH;
-const isVid=u=>/\.(mp4|webm)(\?|$)/i.test(u||''),fitSt=f=>Array.isArray(f)?`object-position:${f[0]}% ${f[1]}%;transform:scale(${f[2]});transform-origin:${f[0]}% ${f[1]}%`:'',
+const isVid=u=>/\.(mp4|webm)(\?|$)/i.test(u||''),fitSt=f=>{if(!Array.isArray(f))return'';const[a,b,c]=f.map(x=>+x||0);return `object-position:${a}% ${b}%;transform:scale(${c||1});transform-origin:${a}% ${b}%`},
 banStyle=u=>u.banner&&!isVid(u.banner)&&!u.bfit?`background-image:url(${esc(cssUrl(u.banner))})`:`background:${esc(u.color)}`,
 banIn=u=>!u.banner?'':isVid(u.banner)?`<video src="${esc(u.banner)}" autoplay muted loop playsinline style="${fitSt(u.bfit)}"></video>`:u.bfit?`<img src="${esc(u.banner)}" alt="" style="${fitSt(u.bfit)}">`:'',
 avLg=(u,id)=>u.afit?`<div class="av lg avf"${id?` id="${id}"`:''}><img src="${esc(AV(u))}" alt="" style="${fitSt(u.afit)}"></div>`:`<img class="av lg"${id?` id="${id}"`:''} src="${esc(AV(u))}" alt="">`;
@@ -81,7 +81,7 @@ async function shrink(f,w,h){const b=await createImageBitmap(f),c=document.creat
 async function bake(f,fit,w,h){const b=await createImageBitmap(f),c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d'),k=Math.max(w/b.width,h/b.height),cw=b.width*k,ch=b.height*k,px=w*fit[0]/100,py=h*fit[1]/100;x.fillStyle='#111';x.fillRect(0,0,w,h);x.translate(px,py);x.scale(fit[2],fit[2]);x.translate(-px,-py);x.drawImage(b,(w-cw)*fit[0]/100,(h-ch)*fit[1]/100,cw,ch);let q=.9,r=c.toDataURL('image/jpeg',q);while(r.length*.75>285e3&&q>.4){q-=.08;r=c.toDataURL('image/jpeg',q)}return r}
 function cropper(f,o){return new Promise(res=>{
  const d=$('#dlg'),u=URL.createObjectURL(f),v=/^video\//.test(f.type),W=o.round?240:330,H=o.round?240:110;let X=50,Y=50,Z=1,nw=0,nh=0,done=0;
- d.innerHTML=`<b>${o.title}</b><div id="cv" style="position:relative;overflow:hidden;width:${W}px;height:${H}px;margin:14px auto 10px;background:#000;touch-action:none;cursor:grab;border-radius:${o.round?'50%':'10px'}">${v?`<video src="${u}" autoplay muted loop playsinline></video>`:`<img src="${u}" alt="">`}</div>
+ d.innerHTML=`<b>${o.title}</b><div id="cv" style="position:relative;overflow:hidden;width:${W}px;height:${H}px;margin:14px auto 10px;background:#000;touch-action:none;cursor:grab;border-radius:${o.round?'50%':'10px'}">${v?`<video src="${esc(u)}" autoplay muted loop playsinline></video>`:`<img src="${esc(u)}" alt="">`}</div>
  <label class="f">Yakınlaştır<input type="range" id="cz" min="1" max="4" step="0.01" value="1" style="width:100%"></label>
  <small class="muted" style="display:block;margin:4px 0 10px">Sürükleyerek konumlandır, kaydırıcı veya fare tekerleğiyle yakınlaştır.</small>
  <button class="btn" id="cok">Tamam</button> <button class="btn g" id="crs">Sıfırla</button> <button class="btn g" id="cno">İptal</button>`;
@@ -114,7 +114,7 @@ function vMe(){
  const raw={},anim=async f=>f.type=='image/gif'||(f.type=='image/webp'&&new TextDecoder('latin1').decode(await f.slice(0,160).arrayBuffer()).includes('ANIM')),vid=f=>/^video\/(mp4|webm)$/.test(f.type);
  const nf=c=>c.fit[0]==50&&c.fit[1]==50&&c.fit[2]==1?null:c.fit,
  setA=(src,ft)=>{$('#pa').outerHTML=avLg({avatar:src,afit:ft},'pa')},
- setB=(src,ft,isv)=>{const pb=$('#pb');pb.style.background=ME.color;pb.innerHTML=isv?`<video src="${src}" autoplay muted loop playsinline style="${fitSt(ft)}"></video>`:`<img src="${src}" alt="" style="${fitSt(ft)}">`};
+ setB=(src,ft,isv)=>{const pb=$('#pb');pb.style.background=ME.color;pb.innerHTML=isv?`<video src="${esc(src)}" autoplay muted loop playsinline style="${fitSt(ft)}"></video>`:`<img src="${esc(src)}" alt="" style="${fitSt(ft)}">`};
  $('#fa').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;if(!/^image\//.test(f.type))return toast('Bir görsel seç');
   const a=await anim(f);if(a&&f.size>120e6)return toast('Hareketli fotoğraf en fazla 120 MB olabilir');
   const c=await cropper(f,{round:1,title:'Profil fotoğrafını ayarla'});if(!c)return;

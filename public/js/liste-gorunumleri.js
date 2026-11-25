@@ -3,7 +3,7 @@
 // ---- Helpers
 async function pick(){ // choose or create playlist
  const ls=await all('lists'),d=$('#dlg');
- d.innerHTML=`<b>Hangi listeye?</b><div style="margin:10px 0">${ls.map(l=>`<button class="btn g" style="margin:3px" data-id="${l.id}">${esc(l.name)}</button>`).join('')}</div>
+ d.innerHTML=`<b>Hangi listeye?</b><div style="margin:10px 0">${ls.map(l=>`<button class="btn g" style="margin:3px" data-id="${esc(l.id)}">${esc(l.name)}</button>`).join('')}</div>
  <input type="text" id="nn" placeholder="Yeni liste adı"><button class="btn" id="mk">Yeni liste oluştur</button> <button class="btn g" id="cl">İptal</button>`;
  d.showModal();
  return new Promise(ok=>{const end=v=>{d.close();ok(v)};
@@ -16,7 +16,7 @@ async function download(t){
  try{const r=await fetch(srcUrl(t));if(!r.ok)throw 0;await put('blobs',{id:t.id,blob:await r.blob()});toast('İndirildi ✓ Çevrimdışı dinlenebilir')}catch{toast('İndirme başarısız')}
 }
 const rowHTML=(t,i,off,extra)=>`<div class="row${t.id===queue[idx]?.id?' cur':''}" data-i="${i}" data-id="${esc(t.id)}">${t.art?`<img src="${esc(t.art)}" loading="lazy">`:'<div class="ph"></div>'}
-<div class="i" data-a="play"><b>${esc(t.title)}</b><small>${esc(t.artist)}${t.src?' · '+t.src:''}</small></div>
+<div class="i" data-a="play"><b>${esc(t.title)}</b><small>${esc(t.artist)}${t.src?' · '+esc(t.src):''}</small></div>
 ${extra||`<button class="ic" data-a="add">${ic('plus')}</button><button class="ic" data-a="sh">${ic('ext')}</button>`}${(t.aid||t.url)?`<button class="ic ${off?'ok':''}" data-a="dl">${ic(off?'check':'dl')}</button>`:''}</div>`;
 // ---- Views
 let view='ara',res=[],cur=null,curList=[];
@@ -41,7 +41,7 @@ async function vAra(){
  M.innerHTML=`<input type="text" id="q" value="${esc(lastQ)}" placeholder="Şarkı, sanatçı veya albüm ara…" enterkeyhint="search">
  <div class="chips">${chips}<button class="chip" id="gs">⚙</button></div>
  ${!jkey()&&src!='audius'&&src!='archive'?'<p class="muted" style="font-size:13px;margin:0 0 10px">Jamendo (yüzbinlerce ücretsiz şarkı) için ⚙ ile ücretsiz anahtar ekle.</p>':''}
- <div class="chips">${gen.map(g=>`<button class="chip${genre==g&&!lastQ?' on':''}" data-g="${g}">${g}</button>`).join('')}</div>
+ <div class="chips">${gen.map(g=>`<button class="chip${genre==g&&!lastQ?' on':''}" data-g="${esc(g)}">${esc(g)}</button>`).join('')}</div>
  <p class="muted" style="margin:4px 0">${lastQ?'“'+esc(lastQ)+'” sonuçları':'Şu an popüler'+(genre?' · '+genre:'')}</p>
  <div id="r">${res.map((t,i)=>rowHTML(t,i,off.has(t.id))).join('')||(busy?'<p class="muted">Yükleniyor…</p>':'<p class="muted">Sonuç bulunamadı.</p>')}</div>
  ${res.length&&more?'<button class="btn g" id="mo" style="width:100%;margin-top:10px">Daha fazla göster</button>':''}`;

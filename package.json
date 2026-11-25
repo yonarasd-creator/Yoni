@@ -9,6 +9,7 @@
     "test": "node test/test.js",
     "test:ui": "node test/ui.test.js",
     "test:db": "node test/db.test.js",
+    "test:static": "node test/statik.test.js",
     "app": "electron electron/main.js",
     "dist": "electron-builder"
   },
@@ -33,7 +34,7 @@
       "provider": "github",
       "releaseType": "release",
       "owner": "yonarasd-creator",
-      "repo": "Muzium"
+      "repo": "Yoni"
     },
     "files": [
       "electron/**",
