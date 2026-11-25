@@ -1,7 +1,7 @@
 // Uçtan uca test: npm test  (sunucuyu geçici veriyle kendisi başlatır)
 const { spawn } = require('child_process'), path = require('path'), os = require('os'), fs = require('fs'), WebSocket = require('ws');
 const PORT = 4123, B = `http://127.0.0.1:${PORT}`, DATA = fs.mkdtempSync(path.join(os.tmpdir(), 'mz-'));
-const srv = spawn(process.execPath, [path.join(__dirname, '../server/index.js')], { env: { ...process.env, PORT, DATA_DIR: DATA } });
+const srv = spawn(process.execPath, [path.join(__dirname, '../server/index.js')], { env: { ...process.env, PORT, DATA_DIR: DATA, YONI_ADMIN: 'alice', YONI_ADMIN_KODU: 'TEST-KODU-1' } });
 let ok = 0, bad = 0; const t = (n, c) => { c ? ok++ : bad++; console.log((c ? '✓ ' : '✗ ') + n); };
 const jar = {}, sleep = ms => new Promise(r => setTimeout(r, ms));
 const call = async (u, m, p, b) => {
@@ -50,6 +50,37 @@ const trk = { id: 'a1', title: 'Şarkı', artist: 'Sanatçı', art: 'https://x.y
   t('"şu an dinliyor" arkadaşa iletilir', evA.some(e => e.type == 'presence' && e.u.np?.title == 'Parça'));
   await call('alice', 'DELETE', '/friends/bob_1');
   t('arkadaşlık bitince mesaj yasak', (await call('bob', 'POST', '/messages/alice', { text: 'x' })).s == 403);
+  // --- Kozmetik / saat bakiyesi / yönetici / kod
+  t('sahip olunmayan kozmetik takılamaz', (await call('bob', 'PATCH', '/me', { kz: 'kis' })).s == 400);
+  t('geçersiz kozmetik kimliği reddedilir', (await call('bob', 'PATCH', '/me', { kz: '__proto__' })).s == 400);
+  r = await call('bob', 'POST', '/me/dinleme', { s: 600 });
+  t('dinleme süresi sayılır', r.s == 200 && r.j.dsn == 600);
+  r = await call('bob', 'POST', '/me/dinleme', { s: 3600 });
+  t('hile: gerçek süreden fazla artış kırpılır', r.s == 200 && r.j.dsn < 600 + 60);
+  t('bakiye yetmezse satın alma reddedilir (402)', (await call('bob', 'POST', '/me/kozmetik/al', { id: 'kis' })).s == 402);
+  t('yönetici olmayan kod üretemez (403)', (await call('bob', 'POST', '/admin/kod', { saat: 5 })).s == 403);
+  r = await call('alice', 'POST', '/login', { username: 'alice', password: 'secret1' });
+  t('yönetici hesabı adm işaretli', r.j.user.adm === true && (await call('bob', 'GET', '/me')).j.user.adm === false);
+  t('yönetici her kozmetiği takabilir', (await call('alice', 'PATCH', '/me', { kz: 'sivi' })).j.user.kz == 'sivi');
+  r = await call('alice', 'POST', '/admin/kod', { saat: 2 });
+  t('yönetici saat kodu üretir', r.s == 200 && /^[0-9A-F]{5}-[0-9A-F]{5}$/.test(r.j.kod));
+  const kod = r.j.kod;
+  r = await call('bob', 'POST', '/me/kod', { kod: kod.toLowerCase() });
+  t('kod kullanılınca saat eklenir', r.s == 200 && r.j.user.dsn >= 600 + 7200);
+  t('kod tek kullanımlık', (await call('bob', 'POST', '/me/kod', { kod })).s == 404);
+  r = await call('bob', 'POST', '/me/kozmetik/al', { id: 'kis' });
+  t('yeterli bakiyeyle satın alma', r.s == 200 && r.j.user.kzs.includes('kis') && r.j.user.hrc == 3600);
+  t('aynı kozmetik tekrar alınamaz (409)', (await call('bob', 'POST', '/me/kozmetik/al', { id: 'kis' })).s == 409);
+  t('satın alınan kozmetik takılır', (await call('bob', 'PATCH', '/me', { kz: 'kis' })).j.user.kz == 'kis');
+  t('arkadaşların görebileceği profilde kz ve dsn var', (await call('alice', 'GET', '/users?q=bob')).j.users[0]?.kz == 'kis');
+  r = await call('alice', 'POST', '/admin/kod', { kz: 'galaksi' });
+  t('yönetici kozmetik kodu üretir', r.s == 200 && (await call('bob', 'POST', '/me/kod', { kod: r.j.kod })).j.user.kzs.includes('galaksi'));
+  t('geçersiz kod 404', (await call('bob', 'POST', '/me/kod', { kod: 'YOK-YOKTU' })).s == 404);
+  r = await call('bob', 'POST', '/me/kod', { kod: 'test-kodu-1' });
+  t('sabit yönetici kodu hesabı yönetici yapar', r.s == 200 && r.j.user.adm === true);
+  // hız sınırı: art arda yanlış girişler 429'a döner
+  let son = 0; for (let i = 0; i < 14; i++) son = (await call('x', 'POST', '/login', { username: 'alice', password: 'yanlis' + i })).s;
+  t('hız sınırı: çok fazla yanlış giriş 429', son == 429);
   t('çıkış yapınca oturum kapanır', (await call('alice', 'POST', '/logout')).s == 200 && (await call('alice', 'GET', '/me')).s == 401);
   await sleep(600); t('veri diske kaydedildi', fs.existsSync(path.join(DATA, 'db.json')));
   console.log(`\n${ok} geçti, ${bad} kaldı`); srv.kill(); process.exit(bad ? 1 : 0);
