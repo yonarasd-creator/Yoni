@@ -30,8 +30,7 @@ async function kutRender(){
  const kh=$('#kh');if(kh)kh.onclick=async()=>{if(!confirm('İndirilen tüm şarkı dosyaları silinecek (listelerin kalır). Emin misin?'))return;for(const x of d.dosyalar)await del('blobs',x.id);toast('Silindi');kutRender()};
  $('#ke').onclick=async()=>{
   const [ls,tr]=await Promise.all([all('lists'),all('tracks')]);
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({yoni:1,tarih:new Date().toISOString(),lists:ls,tracks:tr})],{type:'application/json'}));
-  a.download='yoni-kutuphane-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000);toast('Yedek indirildi')};
+  saveJson('yoni-kutuphane-'+new Date().toISOString().slice(0,10)+'.json',{yoni:1,tarih:new Date().toISOString(),lists:ls,tracks:tr});toast('Yedek indirildi')};
  $('#ki').onclick=()=>$('#kf').click();
  $('#kf').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
   try{const j=JSON.parse(await f.text());if(!j||j.yoni!==1||!Array.isArray(j.lists)||!Array.isArray(j.tracks))throw 0;

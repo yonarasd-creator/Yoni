@@ -49,7 +49,7 @@ function mProg(c,d){if(!mw)return;const k=mw.document.getElementById('mk');if(!k
 au.addEventListener('timeupdate',()=>{if(mw&&!yt)mProg(au.currentTime,au.duration)});au.addEventListener('play',mini);au.addEventListener('pause',mini);au.addEventListener('volumechange',mini);
 $('#tm').onclick=openMini;addEventListener('keydown',e=>{if(e.altKey&&e.code=='KeyM'){e.preventDefault();openMini()}});addEventListener('pagehide',()=>{try{mw&&mw.close()}catch{}});
 function renderSide(){renderSbx();const t=cT();if(!t)return;$('#sa').src=t.art||PH;$('#st').textContent=t.title;$('#sar').textContent=t.artist;
- $('#sq').innerHTML=queue.slice(idx+1,idx+6).map((x,i)=>`<div class="row" data-i="${idx+1+i}">${x.art?`<img src="${esc(x.art)}">`:'<div class="ph"></div>'}<div class="i"><b>${esc(x.title)}</b><small>${esc(x.artist)}</small></div></div>`).join('')||'<p class="muted">Sırada başka şarkı yok</p>'}
+ $('#sq').innerHTML=queue.slice(idx+1,idx+6).map((x,i)=>`<div class="row" data-i="${idx+1+i}">${artImg(x.art)}<div class="i"><b>${esc(x.title)}</b><small>${esc(x.artist)}</small></div></div>`).join('')||'<p class="muted">Sırada başka şarkı yok</p>'}
 $('#sq').onclick=e=>{const r=e.target.closest('.row');r&&play(queue,+r.dataset.i)};
 async function coverOf(l){return l.cover||(l.ids[0]&&(await get('tracks',l.ids[0]))?.art)||''}
 async function vList(){
