@@ -8,9 +8,17 @@ async function pick(){ // choose or create playlist
  d.showModal();
  return new Promise(ok=>{const end=v=>{d.close();ok(v)};
   d.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>end(ls.find(l=>l.id==b.dataset.id)));
-  $('#mk').onclick=async()=>{const n=$('#nn').value.trim();if(!n)return;const l={id:'p'+Date.now(),name:n,ids:[]};await put('lists',l);end(l)};
+  $('#mk').onclick=async()=>{const n=$('#nn').value.trim();if(!n)return;const l={id:'p'+Date.now(),name:n,ids:[]};await put('lists',l);listeYenile();end(l)};
   $('#cl').onclick=()=>end(null)})}
-async function addTo(l,tracks){for(const t of tracks){await put('tracks',t);if(!l.ids.includes(t.id))l.ids.push(t.id)}await put('lists',l)}
+// Yeni listeyi/eklenen şarkıları kenar çubuğunda ve Kitaplık ekranında hemen göster (yenilemeden)
+function listeYenile(){try{renderSbx()}catch{}if(view=='list'&&!cur&&$('#nl'))vList()}
+async function addTo(l,tracks){for(const t of tracks){await put('tracks',t);if(!l.ids.includes(t.id))l.ids.push(t.id)}await put('lists',l);listeYenile()}
+// Electron'da window.prompt() yok (sessizce çalışmaz); metin sorma için uygulama içi pencere
+function askText(title,ph='',val=''){const d=$('#dlg');
+ d.innerHTML=`<b>${esc(title)}</b><input type="text" id="at" placeholder="${esc(ph)}" value="${esc(val)}" style="margin:10px 0;width:100%"><div><button class="btn" id="ao">Tamam</button> <button class="btn g" id="ac">İptal</button></div>`;d.showModal();
+ return new Promise(ok=>{const end=v=>{d.oncancel=null;d.close();ok(v)};
+  $('#ao').onclick=()=>end($('#at').value.trim());$('#ac').onclick=()=>end(null);d.oncancel=()=>end(null);
+  $('#at').onkeydown=e=>{if(e.key=='Enter')end($('#at').value.trim())};$('#at').focus()})}
 async function download(t){
  if(!srcUrl(t))return;toast('İndiriliyor…');
  try{const r=await fetch(srcUrl(t));if(!r.ok)throw 0;await put('blobs',{id:t.id,blob:await r.blob()});toast('İndirildi ✓ Çevrimdışı dinlenebilir')}catch{toast('İndirme başarısız')}

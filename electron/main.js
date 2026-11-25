@@ -1,5 +1,6 @@
 // Yoni masaüstü uygulaması: sunucuyu içinde başlatır, sistem tepsisinde yaşar, genel kısayollar sunar.
-const { app, BrowserWindow, ipcMain, Tray, Menu, globalShortcut, nativeImage, shell, dialog, net } = require('electron');
+const { app, BrowserWindow, ipcMain, Tray, Menu, globalShortcut, nativeImage, shell, dialog, net, powerMonitor } = require('electron');
+const { makeDenetim } = require('./denetim');
 const path = require('path'), http = require('http'), fs = require('fs');
 const PORT = +process.env.MUZIGIM_PORT || 38123, REMOTE = process.env.MUZIGIM_URL; // MUZIGIM_URL: başka bir sunucuya bağlan
 const BASE = REMOTE || `http://localhost:${PORT}`, ICON = path.join(__dirname, 'icon.png');
@@ -111,13 +112,16 @@ function createTray() {
 // --- Otomatik güncelleme: GitHub Releases'e bakar, yeni sürümü indirir, kullanıcıya sorar ---
 function checkUpdates(manual) {
   if (!autoUpdater) { if (manual) dialog.showMessageBox({ message: 'Güncelleme yalnızca kurulu uygulamada çalışır.' }); return; }
+  // Yeni sürüm zaten iniyor/hazırsa tekrar denetleme (otomatik denetimlerde)
+  if (!manual && upState && (upState.durum == 'iniyor' || upState.durum == 'hazir')) return Promise.resolve();
   manualCheck = !!manual;
-  autoUpdater.checkForUpdates().catch(e => { if (manual) dialog.showErrorBox('Güncelleme denetlenemedi', String(e.message || e)); });
+  return autoUpdater.checkForUpdates().catch(e => { if (manual) dialog.showErrorBox('Güncelleme denetlenemedi', String(e.message || e)); });
 }
+const denetle = makeDenetim(checkUpdates, 2 * 60 * 1000); // otomatik denetimler en sık 2 dakikada bir
 let upState = null;
 function send(d) { upState = d; try { if (win && !win.isDestroyed()) win.webContents.send('guncelleme', d); } catch {} }
 ipcMain.handle('guncelleme-durum', () => upState);
-ipcMain.handle('guncelleme-denetle', () => { checkUpdates(true); });
+ipcMain.handle('guncelleme-denetle', () => denetle(true));
 ipcMain.handle('guncelleme-kur', () => { if (autoUpdater && upState && upState.durum == 'hazir') { quitting = true; autoUpdater.quitAndInstall(); } });
 function setupUpdater() {
   if (!autoUpdater) return;
@@ -127,8 +131,11 @@ function setupUpdater() {
   autoUpdater.on('update-not-available', () => { if (manualCheck) dialog.showMessageBox({ message: 'Yoni güncel (' + app.getVersion() + ').' }); manualCheck = false; });
   autoUpdater.on('error', e => { console.error('Güncelleme hatası:', e && e.message); });
   autoUpdater.on('update-downloaded', i => { send({ durum: 'hazir', surum: i.version }); }); // bildirim arayüzde (sağ üst + kedi); tıklayınca kurulur, tıklanmazsa çıkarken kurulur
-  setTimeout(() => checkUpdates(false), 5000);            // açılıştan kısa süre sonra
-  setInterval(() => checkUpdates(false), 6 * 3600 * 1000); // ve her 6 saatte bir
+  // Yeni sürüm yayınlanınca uygulama açıksa da fark etsin: açılışta, her 10 dakikada, pencere öne gelince ve bilgisayar uykudan dönünce denetle
+  setTimeout(() => denetle(false), 5000);
+  setInterval(() => denetle(false), 10 * 60 * 1000);
+  if (win) ['focus', 'show', 'restore'].forEach(o => win.on(o, () => denetle(false)));
+  try { powerMonitor.on('resume', () => setTimeout(() => denetle(false), 10000)); } catch {}
 }
 
 const SHORTCUTS = {

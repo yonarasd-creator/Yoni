@@ -14,5 +14,6 @@ jobs:
       - run: npm install --ignore-scripts
       - run: npm run test:static
       - run: npm run test:db
+      - run: npm run test:update
       - run: npm test
       - run: npm run test:ui
