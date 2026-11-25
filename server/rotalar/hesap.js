@@ -4,7 +4,8 @@ const { db, save, UP } = require('../depo');
 const { HEX, pk, S, num, fit, hash, limit, cookie } = require('../yardimci');
 const { conns, push, pub, me, isFriend, notify } = require('../canli');
 const { userOf, auth, startSession } = require('../oturum');
-const { theme, img, att, kind, MAXB, kozm, KZ, isAdmin } = require('../dogrula');
+const { theme, img, att, kind, MAXB, kozm, KZ, isAdmin, rozet } = require('../dogrula');
+const kodlar = require('../kodlar');
 
 module.exports = (app, express) => {
 app.post('/api/register', async (q, s) => {
@@ -35,6 +36,7 @@ app.patch('/api/me', auth, (q, s) => {
     if ('color' in b) { if (!HEX.test(b.color)) throw new Error('Geçersiz renk'); u.color = b.color; }
     if ('theme' in b) u.theme = theme(b.theme);
     if ('kz' in b) u.kz = kozm(b.kz, u);
+    if ('rz' in b) u.rz = rozet(b.rz, u);
     if ('avatar' in b) img(u, 'avatar', b.avatar);
     if ('banner' in b) img(u, 'banner', b.banner);
     if ('afit' in b) u.afit = fit(b.afit);
@@ -56,26 +58,36 @@ app.post('/api/me/kozmetik/al', auth, (q, s) => {
   if ((u.dsn || 0) - (u.hrc || 0) < bedel) return s.status(402).json({ error: `Yetmiyor: ${KZ[id]} saat gerekiyor` });
   u.hrc = (u.hrc || 0) + bedel; (u.kzs ||= []).push(id); save(); s.json({ user: me(u) });
 });
-// Yönetici kod üretir (bir kozmetik ya da saat verir, tek kullanımlık); herkes kodu girip kullanır
+// Kodlar imzalıdır (server/kodlar.js): yönetici üretir, her kurulum kendi veritabanıyla doğrular; her kod bir sunucuda bir kez kullanılır.
 app.post('/api/admin/kod', auth, (q, s) => {
   if (!isAdmin(q.me)) return s.status(403).json({ error: 'Yalnızca yönetici' });
-  const { kz, saat } = q.body, k = { by: q.me.username, t: Date.now() };
-  if (kz) { if (!Object.hasOwn(KZ, kz)) return s.status(400).json({ error: 'Geçersiz kozmetik' }); k.kz = kz; }
-  else if (+saat > 0 && +saat <= 10000) k.saat = Math.floor(+saat);
+  if (!q.me.ask) return s.status(403).json({ error: 'Kod üretmek için yönetici kodunu "Kod gir" alanına bir kez yaz' });
+  const { kz, saat } = q.body, gun = Math.min(Math.max(+q.body.gun || 7, 1), 365), o = { gun };
+  if (kz) { if (!Object.hasOwn(KZ, kz)) return s.status(400).json({ error: 'Geçersiz kozmetik' }); o.kz = kz; }
+  else if (+saat > 0 && +saat <= 10000) o.saat = Math.floor(+saat);
   else return s.status(400).json({ error: 'Kozmetik ya da saat ver' });
-  const kod = crypto.randomBytes(5).toString('hex').toUpperCase().replace(/(.{5})(.{5})/, '$1-$2');
-  (db.kodlar ||= {})[kod] = k; save(); s.json({ kod });
+  s.json({ kod: kodlar.uret(Buffer.from(q.me.ask, 'hex'), o), gun });
 });
 app.post('/api/me/kod', auth, (q, s) => {
   if (limit('k' + q.ip, 10, 6e4)) return s.status(429).json({ error: 'Çok fazla deneme, biraz bekle' });
-  const kod = String(q.body.kod || '').trim().toUpperCase(), k = (db.kodlar || {})[kod];
-  // Sabit yönetici kodu: doğru girilirse hesap kalıcı yönetici olur. Depoda yalnızca özeti (SHA-256) durur; YONI_ADMIN_KODU ile değiştirilebilir.
-  const ozet = x => crypto.createHash('sha256').update(x).digest(), AH = process.env.YONI_ADMIN_KODU ? ozet(process.env.YONI_ADMIN_KODU.trim().toUpperCase()) : Buffer.from('ad2a5a220a8d152376e0b3a460b94d37b2faf1446606eccf062aa4e02c9f03f7', 'hex');
-  if (crypto.timingSafeEqual(ozet(kod), AH)) { q.me.admin = true; save(); return s.json({ user: me(q.me), mesaj: 'Yönetici oldun' }); }
-  if (!k) return s.status(404).json({ error: 'Kod geçersiz ya da kullanılmış' });
-  const u = q.me; delete db.kodlar[kod];
-  if (k.kz) { if (!(u.kzs ||= []).includes(k.kz)) u.kzs.push(k.kz); } else u.dsn = (u.dsn || 0) + k.saat * 3600;
-  save(); s.json({ user: me(u), mesaj: k.kz ? 'Kozmetik açıldı' : `${k.saat} saat eklendi` });
+  const u = q.me, ham = String(q.body.kod || '').trim(), uyg = k => {
+    if (k.kz) { if (!(u.kzs ||= []).includes(k.kz)) u.kzs.push(k.kz); } else u.dsn = (u.dsn || 0) + k.saat * 3600;
+    save(); s.json({ user: me(u), mesaj: k.kz ? 'Kozmetik açıldı' : `${k.saat} saat eklendi` });
+  };
+  const imzali = kodlar.coz(ham);
+  if (imzali) {
+    if (imzali.exp < Date.now()) return s.status(410).json({ error: 'Kodun süresi dolmuş' });
+    if ((db.kullanilan ||= {})[imzali.n]) return s.status(409).json({ error: 'Bu kod zaten kullanılmış' });
+    db.kullanilan[imzali.n] = Date.now(); return uyg(imzali);
+  }
+  const eski = (db.kodlar || {})[ham.toUpperCase()]; // eski sürümde üretilmiş, bu sunucuya özel kodlar
+  if (eski) { delete db.kodlar[ham.toUpperCase()]; return uyg(eski); }
+  // Yönetici kodu: doğruysa hesap yönetici olur ve kod üretmek için özel anahtar bu hesaba kaydedilir (dışarı verilmez)
+  if (ham.length >= 8 && ham.length <= 64) {
+    const seed = kodlar.tohum(ham), eslesen = kodlar.genelDen(ham).export({ format: 'der', type: 'spki' });
+    if (kodlar.eslesir(eslesen)) { u.admin = true; u.ask = seed.toString('hex'); save(); return s.json({ user: me(u), mesaj: 'Yönetici oldun' }); }
+  }
+  s.status(404).json({ error: ham.startsWith('YK1-') ? 'Kod geçersiz (eksik ya da değiştirilmiş kopyalanmış olabilir)' : 'Kod geçersiz ya da kullanılmış' });
 });
 app.put('/api/me/media/:kind', auth, (q, s, n) => {
   if (!MAXB[q.params.kind]) return s.status(404).json({ error: 'Bulunamadı' });

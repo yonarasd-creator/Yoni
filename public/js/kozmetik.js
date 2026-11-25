@@ -72,7 +72,7 @@ function kzX(u){const t=u&&kzById(u.kz);if(!t)return{cls:'',st:'',ban:'',pat:'',
 // Rozetler: toplam dinleme saatine göre (hiç düşmez). Görseller public/rozet/r1..r9.webp
 const RZ=[{s:1,ad:'Yeni Başlangıç'},{s:5,ad:'Aktif Kullanıcı'},{s:10,ad:'Sadık Kullanıcı'},{s:25,ad:'Zaman Ustası'},{s:50,ad:'Zaman Lordu'},{s:100,ad:'Efsane Kullanıcı'},{s:250,ad:'Usta Kullanıcı'},{s:500,ad:'Efsanevi Kullanıcı'},{s:1000,ad:'Zamanın Efendisi'}];
 const kzRzN=sn=>{let n=0;RZ.forEach((r,i)=>{if(sn>=r.s*3600)n=i+1});return n};
-const kzRz=u=>{const n=kzRzN(u&&u.dsn||0);return n?`<img class="rzm" src="rozet/r${n}.webp" alt="" title="${esc(RZ[n-1].ad)} · ${RZ[n-1].s} saat">`:''};
+const kzRz=u=>{const n=(u&&u.rz)||kzRzN(u&&u.dsn||0);return n?`<img class="rzm" src="rozet/r${n}.webp" alt="" title="${esc(RZ[n-1].ad)} · ${RZ[n-1].s} saat">`:''};
 
 // ---- Dinleme süresi: çalarken her 5 sn'de sayılır, dakikada bir sunucuya gönderilir (sunucu gerçek süreyi aşan artışı kabul etmez)
 let kzLoc=+(lsGet('dsnx')||0),kzSent=0;
@@ -91,12 +91,13 @@ const kzOwn=id=>ME.adm||(ME.kzs||[]).includes(id);
 function kzList(){
  const top=kzTop(),bak=top-(ME.hrc||0),n=kzRzN(top);
  return `<div class="kzl"><h4>Rozetler</h4><small class="muted">Toplam dinleme: <b>${kzDur(top)}</b>${RZ[n]?` · sıradaki: ${esc(RZ[n].ad)} (${RZ[n].s} saat)`:' · hepsi alındı'}</small>
- <div class="rzg">${RZ.map((r,i)=>`<div class="rzt${i<n?'':' lk'}" title="${esc(r.ad)} · ${r.s} saat"><img src="rozet/r${i+1}.webp" alt=""></div>`).join('')}</div>
+ <div class="rzg">${RZ.map((r,i)=>{const ok=ME.adm||i<n;return `<button class="rzt${ok?'':' lk'}${ME.rz==i+1?' on':''}" data-rz="${i+1}" title="${esc(r.ad)} · ${r.s} saat${ok?' · profilde göster':''}"><img src="rozet/r${i+1}.webp" alt=""></button>`}).join('')}</div>
+ <small class="muted">${ME.adm?'Yönetici: hepsini seçebilirsin. ':''}Profilinde göstermek istediğin rozete tıkla. <a href="#" id="rza">Otomatik (en yükseği)</a></small>
  <h4>Kozmetikler</h4><small class="muted">${ME.adm?'Yönetici: hepsi açık':`Harcanabilir bakiye: <b>${kzDur(Math.max(0,bak))}</b>`}</small>
  <div class="kzg"><button class="kzt${ME.kz?'':' on'}" data-kz=""><span class="kzv"><img src="${esc(AV(ME))}" alt=""></span><b>Hiçbiri</b><small>Çıplak profil</small></button>${KZ.map(t=>{const ok=kzOwn(t.id),pr=Math.min(100,Math.floor(Math.max(0,bak)/(t.saat*36)));
   return `<button class="kzt${ME.kz==t.id?' on':''}${ok?'':' lk'}" data-kz="${t.id}" style="--ac:${t.ac}"><span class="kzv"><img src="${esc(AV(ME))}" alt="">${kzFrame(t)}</span><b>${esc(t.ad)}</b><small>${ok?(ME.kz==t.id?'Takılı':'Tak'):ic('lock')+' '+t.saat+' saat · Satın al'}</small>${ok?'':`<i><u style="width:${pr}%"></u></i>`}</button>`}).join('')}</div>
- <h4>Kod gir</h4><div class="row" style="display:flex;gap:6px"><input id="kzkod" placeholder="XXXXX-XXXXX" autocomplete="off" style="flex:1"><button class="btn g" id="kzkb">Kullan</button></div>
- ${ME.adm?`<h4>Kod üret (yönetici)</h4><div style="display:flex;gap:6px;flex-wrap:wrap"><select id="kzak">${KZ.map(t=>`<option value="${t.id}">${esc(t.ad)}</option>`).join('')}<option value="">Saat ver…</option></select><input id="kzas" type="number" min="1" placeholder="saat" style="width:80px"><button class="btn g" id="kzab">Üret</button></div><p id="kzao" class="muted" style="user-select:all"></p>`:''}</div>`}
+ <h4>Kod gir</h4><div class="row" style="display:flex;gap:6px"><input id="kzkod" placeholder="Kodu buraya yapıştır" autocomplete="off" style="flex:1"><button class="btn g" id="kzkb">Kullan</button></div>
+ ${ME.adm?`<h4>Kod üret (yönetici)</h4><div style="display:flex;gap:6px;flex-wrap:wrap"><select id="kzak">${KZ.map(t=>`<option value="${t.id}">${esc(t.ad)}</option>`).join('')}<option value="">Saat ver…</option></select><input id="kzas" type="number" min="1" placeholder="saat" style="width:80px"><input id="kzag" type="number" min="1" max="365" value="7" title="Geçerlilik (gün)" style="width:64px"><button class="btn g" id="kzab">Üret</button></div>${ME.ak?'':'<small class="muted">Kod üretmek için yönetici kodunu yukarıdaki "Kod gir" alanına bir kez yaz.</small>'}<div id="kzao"></div>`:''}</div>`}
 function kzBind(){
  document.querySelectorAll('[data-kz]').forEach(b=>b.onclick=async()=>{const id=b.dataset.kz,t=kzById(id);
   try{
@@ -105,4 +106,6 @@ function kzBind(){
     ME=(await api('POST','/me/kozmetik/al',{id})).user;lsSet('me',ME);toast(t.ad+' alındı');return vMe()}
    ME=(await api('PATCH','/me',{kz:id})).user;lsSet('me',ME);vMe()}catch(e){toast(e.message)}});
  const kb=$('#kzkb');if(kb)kb.onclick=async()=>{try{const r=await api('POST','/me/kod',{kod:$('#kzkod').value});ME=r.user;lsSet('me',ME);toast(r.mesaj);vMe()}catch(e){toast(e.message)}};
- const ab=$('#kzab');if(ab)ab.onclick=async()=>{try{const kz=$('#kzak').value,r=await api('POST','/admin/kod',kz?{kz}:{saat:+$('#kzas').value});$('#kzao').textContent='Kod: '+r.kod}catch(e){toast(e.message)}}}
+ const ab=$('#kzab');if(ab)ab.onclick=async()=>{try{const kz=$('#kzak').value,r=await api('POST','/admin/kod',kz?{kz}:{saat:+$('#kzas').value});$('#kzao').innerHTML=`<textarea id="kzat" readonly rows="3" style="width:100%;margin-top:8px;font-size:12px">${esc(r.kod)}</textarea><button class="btn g" id="kzak">Kopyala</button> <small class="muted">${r.gun} gün geçerli · bir kez kullanılır</small>`;$('#kzat').onclick=e=>e.target.select();$('#kzak').onclick=async()=>{try{await navigator.clipboard.writeText(r.kod);toast('Kopyalandı')}catch{$('#kzat').select();toast('Seçildi, Ctrl+C ile kopyala')}}}catch(e){toast(e.message)}}
+ document.querySelectorAll('[data-rz]').forEach(b=>b.onclick=async()=>{try{ME=(await api('PATCH','/me',{rz:+b.dataset.rz})).user;lsSet('me',ME);vMe()}catch(e){toast(e.message)}});
+ const ra=$('#rza');if(ra)ra.onclick=async e=>{e.preventDefault();try{ME=(await api('PATCH','/me',{rz:0})).user;lsSet('me',ME);vMe()}catch(er){toast(er.message)}}}

@@ -8,8 +8,8 @@ const conns = new Map();
 const push = (u, o) => conns.get(u)?.forEach(w => w.readyState == 1 && w.send(JSON.stringify(o)));
 const pub = u => ({ username: u.username, display: u.display, bio: u.bio, status: u.status, color: u.color,
   avatar: u.avatar ? `/uploads/${u.avatar}?v=${u.av}` : '', banner: u.banner ? `/uploads/${u.banner}?v=${u.bv}` : '',
-  afit: u.afit || null, bfit: u.bfit || null, kz: u.kz || '', dsn: Math.floor(u.dsn || 0), created: u.created, online: conns.has(u.username), np: conns.has(u.username) ? u.np || null : null });
-const me = u => ({ ...pub(u), theme: u.theme || null, kzs: u.kzs || [], hrc: Math.floor(u.hrc || 0), adm: isAdmin(u) });
+  afit: u.afit || null, bfit: u.bfit || null, kz: u.kz || '', rz: u.rz || 0, dsn: Math.floor(u.dsn || 0), created: u.created, online: conns.has(u.username), np: conns.has(u.username) ? u.np || null : null });
+const me = u => ({ ...pub(u), theme: u.theme || null, kzs: u.kzs || [], hrc: Math.floor(u.hrc || 0), adm: isAdmin(u), ak: !!u.ask });
 const isFriend = (a, b) => db.friends[pk(a, b)]?.status == 'friends';
 const notify = un => { for (const r of Object.values(db.friends)) if (r.status == 'friends' && r.u.includes(un)) push(r.u.find(x => x != un), { type: 'presence', u: pub(db.users[un]) }); };
 
