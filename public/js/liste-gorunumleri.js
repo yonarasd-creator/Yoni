@@ -3,7 +3,7 @@
 // ---- Helpers
 async function pick(){ // choose or create playlist
  const ls=await all('lists'),d=$('#dlg');
- d.innerHTML=`<b>Hangi listeye?</b><div style="margin:10px 0">${ls.map(l=>`<button class="btn g" style="margin:3px" data-id="${l.id}">${esc(l.name)}</button>`).join('')}</div>
+ d.innerHTML=`<b>Hangi listeye?</b><div style="margin:10px 0">${ls.map(l=>`<button class="btn g" style="margin:3px" data-id="${esc(l.id)}">${esc(l.name)}</button>`).join('')}</div>
  <input type="text" id="nn" placeholder="Yeni liste adı"><button class="btn" id="mk">Yeni liste oluştur</button> <button class="btn g" id="cl">İptal</button>`;
  d.showModal();
  return new Promise(ok=>{const end=v=>{d.close();ok(v)};
@@ -15,8 +15,8 @@ async function download(t){
  if(!srcUrl(t))return;toast('İndiriliyor…');
  try{const r=await fetch(srcUrl(t));if(!r.ok)throw 0;await put('blobs',{id:t.id,blob:await r.blob()});toast('İndirildi ✓ Çevrimdışı dinlenebilir')}catch{toast('İndirme başarısız')}
 }
-const rowHTML=(t,i,off,extra)=>`<div class="row${t.id===queue[idx]?.id?' cur':''}" data-i="${i}" data-id="${esc(t.id)}">${t.art?`<img src="${esc(t.art)}" loading="lazy">`:'<div class="ph"></div>'}
-<div class="i" data-a="play"><b>${esc(t.title)}</b><small>${esc(t.artist)}${t.src?' · '+t.src:''}</small></div>
+const rowHTML=(t,i,off,extra)=>`<div class="row${t.id===queue[idx]?.id?' cur':''}" data-i="${i}" data-id="${esc(t.id)}">${artImg(t.art,1)}
+<div class="i" data-a="play"><b>${esc(t.title)}</b><small>${esc(t.artist)}${t.src?' · '+esc(t.src):''}</small></div>
 ${extra||`<button class="ic" data-a="add">${ic('plus')}</button><button class="ic" data-a="sh">${ic('ext')}</button>`}${(t.aid||t.url)?`<button class="ic ${off?'ok':''}" data-a="dl">${ic(off?'check':'dl')}</button>`:''}</div>`;
 // ---- Views
 let view='ara',res=[],cur=null,curList=[];
@@ -41,7 +41,7 @@ async function vAra(){
  M.innerHTML=`<input type="text" id="q" value="${esc(lastQ)}" placeholder="Şarkı, sanatçı veya albüm ara…" enterkeyhint="search">
  <div class="chips">${chips}<button class="chip" id="gs">⚙</button></div>
  ${!jkey()&&src!='audius'&&src!='archive'?'<p class="muted" style="font-size:13px;margin:0 0 10px">Jamendo (yüzbinlerce ücretsiz şarkı) için ⚙ ile ücretsiz anahtar ekle.</p>':''}
- <div class="chips">${gen.map(g=>`<button class="chip${genre==g&&!lastQ?' on':''}" data-g="${g}">${g}</button>`).join('')}</div>
+ <div class="chips">${gen.map(g=>`<button class="chip${genre==g&&!lastQ?' on':''}" data-g="${esc(g)}">${esc(g)}</button>`).join('')}</div>
  <p class="muted" style="margin:4px 0">${lastQ?'“'+esc(lastQ)+'” sonuçları':'Şu an popüler'+(genre?' · '+genre:'')}</p>
  <div id="r">${res.map((t,i)=>rowHTML(t,i,off.has(t.id))).join('')||(busy?'<p class="muted">Yükleniyor…</p>':'<p class="muted">Sonuç bulunamadı.</p>')}</div>
  ${res.length&&more?'<button class="btn g" id="mo" style="width:100%;margin-top:10px">Daha fazla göster</button>':''}`;
@@ -66,7 +66,7 @@ async function vHome(){
  M.innerHTML=`<h2 style="margin:0 0 14px">${g}${ME?', '+esc(ME.display):''} 👋</h2>
  <div class="hrow"><div class="aod" id="aod"${dc?` style="background-image:linear-gradient(to top,#000b,#0003),url(${esc(cssUrl(dc))})"`:''}><small>GÜNÜN LİSTESİ</small><button class="pl">▶</button><div><h2>${dl?esc(dl.name):'Henüz liste yok'}</h2><small>${dl?dl.ids.length+' şarkı':'Ara’dan şarkı bul, ＋ ile ekle'}</small></div></div>
  <div><h3 style="margin:0 0 10px">Listelerin</h3><div class="w4" id="hg">${wk.map((l,i)=>tile(l,wc[i])).join('')||'<p class="muted">Daha fazla liste oluşturunca burada görünür.</p>'}</div></div></div>
- <div class="hrow"><div class="pn mix"><h3 style="margin:0 0 6px">Günlük karışım</h3><div id="mx">${mix.map((t,i)=>`<div class="row" data-i="${i}">${t.art?`<img src="${esc(t.art)}">`:'<div class="ph"></div>'}<div class="i"><b>${esc(t.title)}</b><small>${esc(t.artist)}</small></div><small>${esc(t.src||'Cihaz')}</small><button class="ic" data-a="lk">${ic(lkd?.ids.includes(t.id)?'heartf':'heart')}</button></div>`).join('')||'<p class="muted">Şarkı dinledikçe burada görünür.</p>'}</div></div>
+ <div class="hrow"><div class="pn mix"><h3 style="margin:0 0 6px">Günlük karışım</h3><div id="mx">${mix.map((t,i)=>`<div class="row" data-i="${i}">${artImg(t.art)}<div class="i"><b>${esc(t.title)}</b><small>${esc(t.artist)}</small></div><small>${esc(t.src||'Cihaz')}</small><button class="ic" data-a="lk">${ic(lkd?.ids.includes(t.id)?'heartf':'heart')}</button></div>`).join('')||'<p class="muted">Şarkı dinledikçe burada görünür.</p>'}</div></div>
  <div><div class="pn" style="margin-bottom:14px"><h3 style="margin:0 0 6px">Kataloğu genişlet</h3><p class="muted" style="margin:0 0 10px">YouTube ve Jamendo anahtarı ekleyerek çok daha fazla şarkıya ulaş.</p><button class="btn pill" id="hk">Kaynakları ayarla</button></div>
  <div class="pn"><h4 style="margin:0 0 10px">İstatistikler</h4><div class="stats"><div><b>${tt}</b><small>Toplam süre</small></div><div><b>${lkd?lkd.ids.length:0}</b><small>Beğeni</small></div><div><b>${nt}</b><small>Şarkı</small></div></div></div></div></div>`;
  $('#aod').onclick=async()=>{if(dl){const t=await getTs(dl);t.length&&play(t,0)}};
@@ -75,7 +75,7 @@ async function vHome(){
  $('#mx').onclick=async e=>{const r=e.target.closest('.row');if(!r)return;const t=mix[+r.dataset.i];
   if(e.target.closest('[data-a=lk]')){const l=lkd||{id:'liked',name:'❤ Beğenilenler',ids:[]};if(l.ids.includes(t.id)){l.ids=l.ids.filter(x=>x!=t.id);await put('lists',l)}else await addTo(l,[t]);vHome()}else play(mix,+r.dataset.i)}}
 async function renderSbx(){const el=$('#sbx');if(!el)return;const op=lsGet('sbr')=='1';const ls=(await all('lists')).filter(l=>l.id!='recent'),rec=await get('lists','recent'),lkd=await get('lists','liked'),rt=rec?(await getTs(rec)).slice(0,6):[],sc=await Promise.all(ls.slice(0,6).map(coverOf));
- el.innerHTML=`<h4>Listelerim</h4><div class="sbl">${ls.slice(0,6).map((l,i)=>`<a data-l="${esc(l.id)}"><img src="${esc(sc[i]||PH)}"><span>${esc(l.name)}</span></a>`).join('')||'<small class="muted" style="padding:0 10px">Henüz liste yok</small>'}</div><h4 class="tg" id="rtg">Son çalınanlar<span class="cv">${ic(op?'up':'down')}</span></h4><div id="rtl" ${op?'':'hidden'}>${rt.map((t,i)=>`<div class="row" data-r="${i}">${t.art?`<img src="${esc(t.art)}">`:'<div class="ph"></div>'}<div class="i"><b>${esc(t.title)}</b><small>${esc(t.artist)}</small></div><small>${lkd?.ids.includes(t.id)?'❤️':''}</small></div>`).join('')||'<small class="muted" style="padding:0 10px">Henüz yok</small>'}</div>`;
+ el.innerHTML=`<h4>Listelerim</h4><div class="sbl">${ls.slice(0,6).map((l,i)=>`<a data-l="${esc(l.id)}"><img src="${esc(sc[i]||PH)}"><span>${esc(l.name)}</span></a>`).join('')||'<small class="muted" style="padding:0 10px">Henüz liste yok</small>'}</div><h4 class="tg" id="rtg">Son çalınanlar<span class="cv">${ic(op?'up':'down')}</span></h4><div id="rtl" ${op?'':'hidden'}>${rt.map((t,i)=>`<div class="row" data-r="${i}">${artImg(t.art)}<div class="i"><b>${esc(t.title)}</b><small>${esc(t.artist)}</small></div><small>${lkd?.ids.includes(t.id)?'❤️':''}</small></div>`).join('')||'<small class="muted" style="padding:0 10px">Henüz yok</small>'}</div>`;
  el.onclick=e=>{const g=e.target.closest('#rtg');if(g){const o=$('#rtl').hidden;$('#rtl').hidden=!o;g.querySelector('.cv').innerHTML=ic(o?'up':'down');lsSet('sbr',o?'1':'0');return}const a=e.target.closest('[data-l]');if(a){show.keep=a.dataset.l;return show('list')}const r=e.target.closest('[data-r]');if(r)play(rt,+r.dataset.r)}}
 const renderTop=()=>{$('#tav').src=(ME&&ME.avatar)||PH;renderSbx()};
 $('#tq').onkeydown=e=>{if(e.key!='Enter')return;lastQ=e.target.value.trim();genre='';e.target.value='';show('ara');setTimeout(()=>{const q=$('#q');if(q){q.value=lastQ;q.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter'}))}},250)};

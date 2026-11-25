@@ -1,6 +1,6 @@
 {
   "name": "muzigim",
-  "version": "2.17.2",
+  "version": "2.18.0",
   "description": "Kişiselleştirilebilir müzik çalar: hesaplar, profiller, arkadaşlar, mesajlaşma, şarkı paylaşımı, özel temalar",
   "main": "electron/main.js",
   "scripts": {
@@ -8,6 +8,8 @@
     "dev": "node --watch server/index.js",
     "test": "node test/test.js",
     "test:ui": "node test/ui.test.js",
+    "test:db": "node test/db.test.js",
+    "test:static": "node test/statik.test.js",
     "app": "electron electron/main.js",
     "dist": "electron-builder"
   },
@@ -32,7 +34,7 @@
       "provider": "github",
       "releaseType": "release",
       "owner": "yonarasd-creator",
-      "repo": "Muzium"
+      "repo": "Yoni"
     },
     "files": [
       "electron/**",

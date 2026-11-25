@@ -3,6 +3,9 @@
 const API='https://api.audius.co/v1',APP='kisisel_muzik';
 const $=s=>document.querySelector(s),au=$('#au'),M=$('#m');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// Ortak yardımcılar: kapak görseli (yoksa boş yer tutucu) ve JSON dosyası indirme
+const artImg=(a,lazy)=>a?`<img src="${esc(a)}"${lazy?' loading="lazy"':''}>`:'<div class="ph"></div>';
+const saveJson=(ad,obj)=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(obj)],{type:'application/json'}));a.download=ad;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000)};
 const cssUrl=u=>String(u??'').replace(/['"()\\\s]/g,c=>'%'+c.charCodeAt(0).toString(16).padStart(2,'0')); // CSS url() içine güvenle koymak için
 const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>e.classList.remove('on'),2500)};
 // ---- Simge seti (çizgi tabanlı SVG; renk metinden gelir, boyut yazı boyutuna uyar)

@@ -74,7 +74,7 @@ function vTheme(){
   try{let blob=f,m='image';if(f.type.startsWith('video')){m='video';if(f.size>40e6)return toast('Video en fazla 40 MB olmalı (akıcılık için)')}else blob=await toBlob(f,1920);
    await put('blobs',{id:'bg:media',blob});TH.m=m;await setBg(TH);applyVars(TH);saveTheme();toast('Arka plan ayarlandı ✓')}catch{toast('Dosya okunamadı')}};
  $('#br').onclick=async()=>{await del('blobs','bg:media');TH.m='';await setBg(TH);applyVars(TH);saveTheme()};
- $('#ex').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({...TH,m:''})],{type:'application/json'}));a.download='yoni-tema.json';a.click()};
+ $('#ex').onclick=()=>saveJson('yoni-tema.json',{...TH,m:''});
  $('#im').onclick=()=>$('#tf').click();
  $('#tf').onchange=async e=>{try{const j=JSON.parse(await e.target.files[0].text());for(const k of Object.keys(DT)){if(k=='m'||!(k in j))continue;if(['a','c','s','x'].includes(k)?HEXR.test(j[k]):typeof j[k]==typeof DT[k])TH[k]=j[k]}applyVars(TH);saveTheme();vTheme();toast('Tema yüklendi ✓')}catch{toast('Geçersiz tema dosyası')}}}
 
