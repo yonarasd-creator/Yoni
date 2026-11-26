@@ -27,7 +27,7 @@ $('#ly').onclick=async()=>{const t=cT();if(!t)return;const d=$('#dlg');
  const e=$('#lyt');if(e)e.textContent=x};
 $('#ar').onclick=async()=>{const t=cT();if(!t)return;const d=$('#dlg');d.innerHTML=`<b>👤 ${esc(t.artist)}</b><div id="arl" style="max-height:60vh;overflow:auto;margin:8px 0"><p class="muted">Yükleniyor…</p></div><button class="btn g" id="arc">Kapat</button>`;
  if(!d.open)d.showModal();$('#arc').onclick=()=>d.close();let l=[];
- try{l=t.yid?await S.youtube(t.artist,0):(await search(t.artist,25)).filter(x=>x.artist==t.artist)}catch{}
+ try{l=await S.youtube(t.artist,0)}catch{}
  const e=$('#arl');if(!e)return;e.innerHTML=l.map((x,i)=>`<div class="row" data-i="${i}">${artImg(x.art)}<div class="i"><b>${esc(x.title)}</b><small>${esc(x.artist)}</small></div></div>`).join('')||'<p class="muted">Başka şarkı bulunamadı.</p>';
  e.onclick=ev=>{const r=ev.target.closest('.row');if(r){d.close();play(l,+r.dataset.i)}}};
 if('mediaSession'in navigator){const ms=navigator.mediaSession,H=(a,f)=>{try{ms.setActionHandler(a,f)}catch{}};

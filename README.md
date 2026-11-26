@@ -22,7 +22,7 @@ Kişiselleştirilebilir müzik çalar: hesap/giriş, Discord tarzı profiller, a
 - **Sosyal:** kullanıcı ara → arkadaş ekle/kabul et, çevrimiçi durumu, "🎧 şu an dinliyor", anlık mesajlaşma (WebSocket), okunmamış rozeti.
 - **Şarkı paylaşma:** her şarkıdaki **↗** ile arkadaşına gönder; alıcı sohbetten çalar veya listesine ekler.
 - **Tema:** 6 hazır tema, 4 renk, köşe yuvarlaklığı, yazı boyutu, panel opaklığı, karartma, bulanıklık, **kendi arka plan görselin veya videon**, tema dışa/içe aktarma. Renk ve ayarlar hesabına senkronlanır; arka plan dosyası yalnızca o cihazda kalır.
-- **Müzik:** Audius + Jamendo + Internet Archive araması, indir/çevrimdışı dinle, kendi mp3 dosyaların, Spotify/YT/Apple liste içe aktarma (CSV), karışık/tekrar, tam ekran oynatıcı, ses ayarı.
+- **Müzik:** yalnızca YouTube (hesap bağlayarak veya API anahtarıyla), kendi mp3 dosyaların, Spotify/YT/Apple liste içe aktarma (CSV), karışık/tekrar, tam ekran oynatıcı, ses ayarı.
 
 ## Performans notları
 - Tema değişiklikleri yalnızca CSS değişkenleri ile yapılır (yeniden çizim yok), kaydırıcılar `requestAnimationFrame` ile sınırlıdır.

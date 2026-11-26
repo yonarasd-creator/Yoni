@@ -48,17 +48,17 @@ async function ytCard(){
   box.querySelectorAll('[data-pl]').forEach(r=>r.querySelector('button').onclick=async()=>{try{let tr=await ytPlTracks(r.dataset.pl,r.dataset.n,log);const n0=tr.length;log('Çalınabilirlik denetleniyor…');tr=await ytEmbeddable(tr);if(!tr.length)return log('Bu videoların hiçbiri uygulamada çalınamıyor (sahibi gömmeye izin vermiyor)');await done(await get('lists','yt-'+r.dataset.pl)||{id:'yt-'+r.dataset.pl,name:'▶ '+r.dataset.n,ids:[]},tr,n0)}catch(e){log(e.message)}})
  }catch(e){if(!$('#ytb'))return;box.innerHTML=`<p class="muted">${esc(e.message)}</p><button class="btn g" id="yd">Bağlantıyı kes</button>`;$('#yd').onclick=()=>{YTA.set(null);ytCache=null;ytCard()}}}
 function vImp(){
- M.innerHTML=`<div class="card"><b>Dış listeleri içe aktar</b><p class="muted">Spotify / YT Music / Apple Music listeni önce dışa aktar:<br>
+ PN().innerHTML=`<div class="card"><b>Dış listeleri içe aktar</b><p class="muted">Spotify / YT Music / Apple Music listeni önce dışa aktar:<br>
  • Spotify → <u>exportify.net</u> ile CSV indir<br>• YT Music / Apple Music → <u>tunemymusic.com</u> veya <u>soundiiz.com</u> ile CSV indir<br>
  • Ya da bir .txt dosyasına her satıra <i>Sanatçı - Şarkı</i> yaz.</p>
  <button class="btn" id="pf">Dosya seç (.csv .json .txt)</button><input type="file" id="fi" accept=".csv,.json,.txt" hidden></div>
- <div class="card muted" style="font-size:13px">Şarkılar Audius kataloğunda aranıp eşleştirilir. Bulunamayanlar listelenir; Audius'ta olmayan ticari şarkılar (Spotify/Apple DRM'li) çalınamaz.</div><div id="log"></div><div id="kut"></div>`;kutRender();
+ <div class="card muted" style="font-size:13px">Şarkılar YouTube'da aranıp eşleştirilir (YouTube hesabın bağlı olmalı). YouTube'un günlük arama kotası sınırlıdır (yaklaşık 100 şarkı/gün); kota dolarsa kalanlar ertesi gün için listelenir.</div><div id="log"></div><div id="kut"></div>`;kutRender();
  $('#pf').onclick=()=>$('#fi').click();
  $('#fi').onchange=async e=>{const f=e.target.files[0];if(!f)return;
   const items=parseAny(await f.text(),f.name);if(!items.length)return toast('Dosyada şarkı bulunamadı');
   const l={id:'p'+Date.now(),name:f.name.replace(/\.[^.]+$/,''),ids:[]},miss=[],log=$('#log');let ok=0;
   for(let i=0;i<items.length;i++){log.innerHTML=`<div class="card">Eşleştiriliyor ${i+1}/${items.length}…</div>`;
-   try{const qq=`${items[i].artist} ${items[i].title}`.trim();let r=await search(qq,1);if(!r[0]&&jkey())r=await S.jamendo(qq,0,1);if(r[0]){await addTo(l,[r[0]]);ok++}else miss.push(items[i])}catch{miss.push(items[i])}}
+   try{const qq=`${items[i].artist} ${items[i].title}`.trim(),r=await S.youtube(qq,0);if(r[0]){await addTo(l,[r[0]]);ok++}else miss.push(items[i])}catch(e){if(/quota/i.test(e.message)){miss.push(...items.slice(i));break}miss.push(items[i])}}
   await put('lists',l);
   log.innerHTML=`<div class="card"><b>“${esc(l.name)}” oluşturuldu</b><br>${ok} bulundu, ${miss.length} bulunamadı.${miss.length?`<details><summary>Bulunamayanlar</summary><small class="muted">${miss.map(x=>esc(x.artist+' - '+x.title)).join('<br>')}</small></details>`:''}</div>`}
 }

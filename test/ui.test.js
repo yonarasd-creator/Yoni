@@ -20,7 +20,7 @@ srv.stdout.once('data',async()=>{
  t('giriş ekranı görünür',!d.querySelector('#auth').hidden);
  d.querySelector('#sw').click();d.querySelector('#lu').value='deniz';d.querySelector('#lp').value='sifre123';d.querySelector('#go').click();await sleep(700);
  t('kayıt sonrası uygulama açılır',d.querySelector('#auth').hidden&&d.querySelectorAll('.row').length>0);
- for(const v of['soc','thm','me','ara','list','imp']){d.querySelector(`[data-v=${v}]`).click();await sleep(250);t('sekme: '+v,d.querySelector('main').innerHTML.length>50)}
+ for(const v of['soc','set','me','ara','list']){d.querySelector(`[data-v=${v}]`).click();await sleep(250);t('sekme: '+v,d.querySelector('main').innerHTML.length>50)}
  d.querySelector('[data-v=thm]').click();await sleep(200);d.querySelector('[data-p="4"]').click();await sleep(100);
  t('tema ön ayarı uygulanır',w.document.documentElement.style.getPropertyValue('--a')=='#0d9488');
  const rg=d.querySelector('[data-k=r]');rg.value=20;rg.dispatchEvent(new w.Event('input',{bubbles:true}));await sleep(100);

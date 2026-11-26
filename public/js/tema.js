@@ -46,9 +46,8 @@ function saveTheme(){lsSet('theme',TH);clearTimeout(sy);sy=setTimeout(()=>ME&&!o
 async function toBlob(f,max){const b=await createImageBitmap(f),k=Math.min(1,max/Math.max(b.width,b.height)),c=document.createElement('canvas');c.width=Math.round(b.width*k);c.height=Math.round(b.height*k);c.getContext('2d').drawImage(b,0,0,c.width,c.height);return new Promise(r=>c.toBlob(r,'image/webp',.85))}
 function vTheme(){
  const c=(k,l)=>`<label class="f">${l}<input type="color" data-k="${k}" value="${TH[k]}"></label>`,r=(k,l,a,b)=>`<label class="f">${l}<input type="range" data-k="${k}" min="${a}" max="${b}" value="${TH[k]}"></label>`;
- M.innerHTML=`<div id="tc"><h4 style="margin-top:0">Hazır temalar</h4><div class="chips">${PRE.map((p,i)=>`<button class="chip" data-p="${i}" style="border-left:14px solid ${p.t.a}">${p.n}</button>`).join('')}</div>
+ PN().innerHTML=`<div id="tc"><h4 style="margin-top:0">Hazır temalar</h4><div class="chips">${PRE.map((p,i)=>`<button class="chip" data-p="${i}" style="border-left:14px solid ${p.t.a}">${p.n}</button>`).join('')}</div>
  <h4>Logo</h4><div class="chips">${LOGOS.map(l=>`<button class="chip" data-lg="${l.id}" aria-label="Logo" style="padding:4px;display:inline-flex${TH.lg==l.id?';outline:2px solid var(--a)':''}"><img src="${l.f}" alt="" style="width:64px;height:64px;border-radius:10px;display:block"></button>`).join('')}</div>
- <h4>YouTube hesabı ▶</h4><div id="ytb" style="margin-bottom:6px"></div>
  <h4>Yoldaşlar: kedi, kurt, ejderha</h4><label class="f">Yoldaşları göster<input type="checkbox" data-k="kd" ${TH.kd!==false?'checked':''}></label>
  <div class="chips">${(()=>{const KL=TH.kl&&TH.kl.length?TH.kl:['zencefil'];return Kedi.types.map(([id,n])=>`<button class="chip" data-cat="${id}" aria-pressed="${KL.includes(id)}" title="${n}" style="padding:6px 8px;display:inline-flex;flex-direction:column;align-items:center;gap:2px${KL.includes(id)?';outline:2px solid var(--a)':''}"><img src="${KediArt.thumb(id)}" alt="" width="96" height="84" style="display:block;image-rendering:pixelated"><small>${n}</small></button>`).join('')})()}</div>
  <div style="margin:6px 0"><button class="btn g" id="oz">${ic('plus')} Kendi görselini ekle</button><input type="file" id="ozf" accept="image/*" hidden> ${(lsGet('ozel')||[]).map(o=>`<button class="chip" data-ozdel="${esc(o.id)}" title="Kaldır">${esc(o.name)} ${ic('close')}</button>`).join('')}</div>
@@ -65,7 +64,6 @@ function vTheme(){
  tc.oninput=e=>{const k=e.target.dataset.k;if(!k)return;TH[k]=e.target.type=='checkbox'?e.target.checked:e.target.type=='range'?+e.target.value:e.target.value;
   cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{applyVars(TH);const v=$('#bg video');v&&vidPlay(v)})};
  tc.onchange=e=>{if(e.target.dataset.k)saveTheme()};
- ytCard();
  tc.onclick=e=>{if(e.target.closest('#kfare')){Kedi.mouse();return}const ct=e.target.closest('[data-cat]');if(ct){const id=ct.dataset.cat;let l=TH.kl&&TH.kl.length?[...TH.kl]:['zencefil'];if(l.includes(id)){if(l.length>1)l=l.filter(x=>x!=id)}else{if(l.length>=Kedi.max)l.shift();l.push(id)}TH.kl=l;if(TH.kd===false)TH.kd=true;Kedi.sync(TH);saveTheme();vTheme();return}const od=e.target.closest('[data-ozdel]');if(od){ozelSil(od.dataset.ozdel);return}const lg=e.target.closest('[data-lg]');if(lg){openLogo(lg.dataset.lg);return}const p=e.target.closest('[data-p]');if(p){Object.assign(TH,{fx:''},PRE[p.dataset.p].t);applyVars(TH);saveTheme();vTheme()}};
  $('#oz').onclick=()=>$('#ozf').click();
  $('#ozf').onchange=async e=>{const f=e.target.files[0];if(f)await ozelEkle(f)};
