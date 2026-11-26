@@ -192,7 +192,9 @@
     else if (r < .75) setSt(c, 'groom', rnd(3, 4.5));
     else if (r < .81) setSt(c, 'yawn', 1.7);
     else if (r < .87) setSt(c, 'stretch', 2);
-    else if (r < .93 && performance.now() - ptr.t < 6000 && ptr.x > 0 && ptr.y > P.y - 400 && ptr.y < P.y + 40) walkTo(c, clamp(ptr.x + (c.x < ptr.x ? -50 : 50), P.x1 + 20, P.x2 - 20), 95);
+    else if (r < .90) setSt(c, 'reach', rnd(2.5, 4));
+    else if (r < .94) setSt(c, 'play', rnd(6, 10));
+    else if (r < .97 && performance.now() - ptr.t < 6000 && ptr.x > 0 && ptr.y > P.y - 400 && ptr.y < P.y + 40) walkTo(c, clamp(ptr.x + (c.x < ptr.x ? -50 : 50), P.x1 + 20, P.x2 - 20), 95);
     else setSt(c, 'sit', rnd(2, 5));
   }
 
@@ -284,7 +286,9 @@
       case 'sit': return { ...base, pose: 'sit', eyes, look, ear, breath: Math.round(Math.sin(T * 2)), head: { dy: bounce }, tail: { ph: tph(T, music ? 6 : 2.2), sway: music ? 22 : 14 } };
       case 'groom': return { ...base, pose: 'sit', eyes: 'closed', mouth: Math.floor(T * 4) % 2 ? 'lick' : 'closed', head: { dx: -3, dy: 5 }, paw: Math.floor(T * 5) % 2 ? 1 : -1, tail: { ph: tph(T, 1.6), sway: 8 } };
       case 'yawn': { const o = c.t < 1.3 && c.t > .4; return { ...base, pose: 'sit', eyes: 'closed', mouth: o ? 'open' : 'closed', head: { dy: o ? -1 : 0 }, tail: { ph: tph(T, 1.5), sway: 8 } }; }
-      case 'stretch': return { ...base, pose: 'stand', pitch: 4, feet: [[16, 38], [13, 38], [40, 38], [37, 38]], eyes: 'half', tail: { a: 255, curl: 3, sway: 6, ph: tph(T, 2) } };
+      case 'stretch': return { ...base, pose: 'bow', eyes: Math.floor(T * 2) % 3 == 2 ? 'closed' : 'half', breath: Math.round(Math.sin(T * 2.4)), tail: { sway: 7, ph: tph(T, 2) } };
+      case 'reach': { const k = Math.floor(T * 3); return { ...base, pose: 'reach', eyes, look, ear, up: k % 2, wave: -(k % 3), breath: Math.round(Math.sin(T * 2)), tail: { ph: tph(T, 2.4), sway: 16 } }; }
+      case 'play': { const k = Math.floor(T * 3) % 4; return { ...base, pose: 'play', eyes: 'open', ear, ball: [0, -1, -2, -1][k], hit: k == 2 ? 2 : 0, nod: k == 2 ? 1 : 0, ph: Math.floor(T * 4) % 8 * Math.PI / 4, breath: Math.round(Math.sin(T * 2)), tail: { ph: tph(T, 3.2), sway: 18 } }; }
       case 'loaf': return { ...base, pose: 'loaf', eyes: c.blink > 0 || Math.floor(T / 3) % 3 == 2 ? 'closed' : 'half', breath: Math.round(Math.sin(T * 1.6)), head: { base: 1 }, tail: { sway: 5, ph: tph(T, 1.2) } };
       case 'sleep': {
         const br = Math.round(Math.sin(T * 1.4)), ledge = c.edge && c.plat && !c.plat.ground;
@@ -331,7 +335,7 @@
         if (c.t <= 0) next(c);
         break;
       }
-      case 'groom': case 'yawn': case 'stretch': case 'land': c.t -= dt; if (c.t <= 0) setSt(c, 'sit', rnd(1, 3)); break;
+      case 'groom': case 'yawn': case 'stretch': case 'reach': case 'play': case 'land': c.t -= dt; if (c.t <= 0) setSt(c, 'sit', rnd(1, 3)); break;
       case 'loaf': c.t -= dt; if (c.t <= 0) Math.random() < .5 ? startSleep(c) : setSt(c, 'stretch', 2); break;
       case 'crouch': c.t -= dt; if (c.t <= 0) launch(c); break;
       case 'sleep': {

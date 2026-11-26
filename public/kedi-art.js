@@ -359,6 +359,42 @@
     return head(r, t, { ...P, flat: 1, eyes: P.eyes || 'closed' }, 33.5, 30.5 + (P.head && P.head.dy || 0));
   };
 
+  // ---- yeni pozlar (kediler): gerinme, pati uzatma, yumakla oyun ----
+  const pawCol = t => (t.pat == 'tux' || t.belly || t.fluff) ? t.l : (t.pat == 'siamese' ? t.p : t.b);
+  const legCol = t => t.pat == 'siamese' ? t.p : t.b;
+  // gerinme: kalça havada, göğüs ve ön patiler öne uzanmış yerde, kuyruk dik
+  POSES.bow = (r, t, P) => {
+    const br = P.breath || 0, lc = legCol(t), pc = pawCol(t), sw = P.tail && P.tail.sway != null ? P.tail.sway : 6;
+    leg(r, t, 12.5, 27, 10, 38, true); leg(r, t, 16.5, 28, 17, 38, true);
+    tail(r, t, { ...P, tail: { a: 258, curl: 3, sway: sw, n: 8, ...(P.tail || {}) } }, 10.5, 24.5);
+    r.ell(21, 30.5 + br * .2, 11.5, 5.6, bodyCol(t, .6), .3);
+    r.ell(14, 27.5, 5.8, 5.6, bodyCol(t, .55));
+    r.line(26, 33, 38, 37, 3, dark(lc, .85)); r.ell(40, 37.4, 3, 1.5, dark(pc, .9));
+    r.line(28, 32.5, 40, 36, 3, lc); r.ell(42, 36.6, 3, 1.6, pc);
+    leg(r, t, 13.5, 28.5, 12, 38, false); leg(r, t, 17.5, 29, 19.5, 38, false);
+    return head(r, t, { ...P, eyes: P.eyes || 'half', head: { dy: 1, ...(P.head || {}) } }, 35, 29.5);
+  };
+  // pati uzatma: oturur, bir ön pati havaya kalkar (sallanabilir)
+  POSES.reach = (r, t, P) => {
+    const w = sitCat(r, t, { ...P, paw: undefined }), lc = legCol(t), pc = pawCol(t), up = P.up || 0;
+    const tx = 42 + Math.max(-4, Math.min(0, P.wave || 0)), ty = 5 - up;
+    r.line(30, 22, 40.5, 17.5, 3, lc); r.line(40.5, 17.5, tx, ty + 3, 3, lc); r.ell(tx, ty + 1.5, 2.5, 2.2, pc);
+    return w;
+  };
+  // yumakla oyun: yerdeki yumağa pati uzatır, yumak sağa sola yuvarlanır
+  POSES.play = (r, t, P) => {
+    const bx = 40 + (P.ball || 0), by = 34.5, pc = pawCol(t), lc = legCol(t), red = C('#d6453d'), red2 = C('#9c2d28'), rl = C('#ef7a6f');
+    // yumak ve ipi
+    const s = P.ph || 0;
+    r.line(bx + 1, by + 3, bx + 4 + Math.sin(s) * 1.2, 37.4, 1, red2); r.line(bx + 4, 37.4, 46, 36.4 - Math.cos(s), 1, red2);
+    r.ell(bx, by, 3.7, 3.7, red); r.line(bx - 2.4, by - .8, bx + 1.8, by + 2.4, 1, red2); r.line(bx - 1.4, by - 2.2, bx + 2.6, by + .6, 1, red2); r.px(bx - 1.2, by - 1.6, rl);
+    const w = sitCat(r, t, { ...P, paw: undefined, head: { dx: 1, dy: 3 + (P.nod || 0), ...(P.head || {}) }, eyes: P.eyes || 'open', look: { x: 1, y: 1 } });
+    const px = 36.2 + (P.hit || 0), py = 34.2 + (P.hit ? -1 : 0);
+    r.line(30, 22, 34, 30, 3, lc); r.line(34, 30, px, py, 3, lc); r.ell(px + 1.4, py + .8, 2.4, 1.7, pc);
+    return w;
+  };
+  for (const k of ['bow', 'reach', 'play']) { const f = POSES[k]; POSES[k] = (r, t, P) => t.sp ? POSES.sit(r, t, P) : f(r, t, P); }
+
   // duvara tırmanma: kafa yukarıda, ön patiler duvara (x≈41) uzanır, kuyruk aşağı sarkar
   POSES.climb = (r, t, P) => {
     const ph = P.ph || 0, s1 = Math.sin(ph * Math.PI * 2), s2 = Math.sin(ph * Math.PI * 2 + Math.PI), bob = (P.bob || 0) + 5;
@@ -394,7 +430,7 @@
     if (custom.has(id)) return drawCustom(custom.get(id), P);
     const t = T[id] || T.zencefil, r = ctx();
     if (P.shadow !== false) { const k = pack(0, 0, 0, 60); for (let x = 9; x <= 38; x++) { const d = Math.abs(x - 23.5) / 15; if (d < 1) { r.px(x, B + 1, k); if (d < .7) r.px(x, B + 2, k); } } }
-    if (t.sp == 'ejder' && (P.pose || 'stand') != 'sit') wings(r, t, P);
+    if (t.sp == 'ejder' && !['sit', 'bow', 'reach', 'play'].includes(P.pose || 'stand')) wings(r, t, P);
     const f = POSES[P.pose || 'stand']; const w = f(r, t, P);
     finish(r, t);
     if (w && !P.noWhisk) whiskers(r, w.whisk);
