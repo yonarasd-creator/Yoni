@@ -1,9 +1,10 @@
 // Temel yardımcılar ve IndexedDB (şarkılar, listeler, indirilenler)
 // Not: klasik betik; tüm dosyalar aynı genel kapsamı paylaşır, yükleme sırası index.html'deki sıradır.
-const API='https://api.audius.co/v1',APP='kisisel_muzik';
 const $=s=>document.querySelector(s),au=$('#au'),M=$('#m');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 // Ortak yardımcılar: kapak görseli (yoksa boş yer tutucu) ve JSON dosyası indirme
+// Ayarlar sekmeleri içeriklerini #sc kutusuna, bağımsız açılınca ana alana çizer
+const PN=()=>$('#sc')||M;
 const artImg=(a,lazy)=>a?`<img src="${esc(a)}"${lazy?' loading="lazy"':''}>`:'<div class="ph"></div>';
 const saveJson=(ad,obj)=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(obj)],{type:'application/json'}));a.download=ad;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000)};
 const cssUrl=u=>String(u??'').replace(/['"()\\\s]/g,c=>'%'+c.charCodeAt(0).toString(16).padStart(2,'0')); // CSS url() içine güvenle koymak için

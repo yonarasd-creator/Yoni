@@ -55,12 +55,12 @@ async function coverOf(l){return l.cover||(l.ids[0]&&(await get('tracks',l.ids[0
 async function vList(){
  if(cur)return vOne();
  const ls=await all('lists'),cv=await Promise.all(ls.map(coverOf));
- M.innerHTML=`<div class="tb"><b style="font-size:18px">Kitaplığın</b><span><button class="btn sm" id="nl">＋ Yeni liste</button> <button class="btn g sm" id="lf">${ic('folder')} Dosya ekle</button></span></div>`+
-  (ls.map((l,i)=>`<div class="row lrow" data-id="${esc(l.id)}"><img src="${esc(cv[i]||PH)}"><div class="i"><b>${esc(l.name)}</b><small>Liste · ${l.ids.length} şarkı${l.bio?' · '+esc(l.bio):''}</small></div></div>`).join('')||'<p class="muted">Henüz liste yok. Arama’dan ＋ ile ekle veya İçe Aktar’ı kullan.</p>')+
+ M.innerHTML=`<div class="tb"><b style="font-size:18px">Kitaplığın</b><span><button class="btn sm" id="nl">＋ Yeni liste</button> <button class="btn g sm" id="lf">${ic('folder')} Dosya ekle</button> <button class="btn g sm" id="li">${ic('imp')} İçe aktar</button></span></div>`+
+  (ls.map((l,i)=>`<div class="row lrow" data-id="${esc(l.id)}"><img src="${esc(cv[i]||PH)}"><div class="i"><b>${esc(l.name)}</b><small>Liste · ${l.ids.length} şarkı${l.bio?' · '+esc(l.bio):''}</small></div></div>`).join('')||'<p class="muted">Henüz liste yok. Ara’dan YouTube’da şarkı bul, ＋ ile ekle veya İçe aktar’ı kullan.</p>')+
   `<input type="file" id="fi" accept="audio/*" multiple hidden>`;
  M.querySelectorAll('.lrow').forEach(c=>c.onclick=()=>{cur=c.dataset.id;vOne()});
  $('#nl').onclick=async()=>{const n=(await askText('Yeni liste','Liste adı')||'').trim();if(!n)return;const l={id:'p'+Date.now(),name:n,ids:[]};await put('lists',l);renderSbx();cur=l.id;vOne()};
- $('#lf').onclick=()=>$('#fi').click();
+ $('#lf').onclick=()=>$('#fi').click();$('#li').onclick=()=>show('imp');
  $('#fi').onchange=async e=>{const l=await pick();if(!l)return;const ts=[];let n=0;
   for(const f of e.target.files){const id='l'+Date.now()+(n++);await put('blobs',{id,blob:f});ts.push({id,title:f.name.replace(/\.[^.]+$/,''),artist:'Cihazım',art:''})}
   await addTo(l,ts);toast(ts.length+' dosya eklendi');vList()};

@@ -22,7 +22,7 @@ async function moodPool(k){const c=moodCache[k];if(c&&Date.now()-c.t<3e5)return 
  const M=MODES.find(m=>m.k==k),h=kmGet('mh')[k]||{};let ts=[];try{ts=await all('tracks')}catch{}
  const sc=t=>(h[t.id]||0)*3+(M.kw.test((t.title||'')+' '+(t.artist||''))?2:0),loc=ts.filter(t=>t&&t.id&&sc(t)>=2).map(t=>[sc(t)+Math.random(),t]).sort((a,b)=>b[0]-a[0]).map(x=>x[1]);
  let ext=[];if(loc.length<18){const qs=[...M.q].sort(()=>Math.random()-.5).slice(0,2);
-  const rs=await Promise.allSettled(qs.flatMap(q=>[S.audius(q,0,12),S.youtube(q,0),S.jamendo(q,0,10)]));
+  const rs=await Promise.allSettled(qs.flatMap(q=>[S.youtube(q,0)]));
   ext=rs.flatMap(r=>r.status=='fulfilled'?r.value:[]).sort(()=>Math.random()-.5)}
  const seen=new Set(),l=[...loc,...ext].filter(t=>t&&t.id&&!seen.has(t.id)&&seen.add(t.id));moodCache[k]={t:Date.now(),l};return l}
 const okMap=new Map();
